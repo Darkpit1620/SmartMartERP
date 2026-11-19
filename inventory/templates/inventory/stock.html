@@ -1,0 +1,20 @@
+{% extends 'inventory/layout.html' %}
+{% block title %}Branch Inventory | SmartMart ERP{% endblock %}
+{% block inventory_content %}
+<section class="inventory-banner"><div><div class="eyebrow">BRANCH OPERATIONS</div><h1>Inventory &amp; stock</h1><p>Stock levels and low-stock alerts for your selected branch.</p></div><div class="inventory-symbol">▥</div></section>
+<div class="inventory-stat-row"><div class="inventory-stat"><strong>{{ total_products }}</strong><span>Active catalogue products</span></div><div class="inventory-stat"><strong>{{ low_on_page }}</strong><span>Low-stock products on this page</span></div><div class="inventory-stat"><strong>{{ movement_count }}</strong><span>Recorded branch stock movements</span></div></div>
+{% if not branch %}<div class="inventory-panel inventory-empty"><h2>No active branch exists</h2><p>Create a branch through <a class="inventory-strong-link" href="{% url 'admin:core_branch_changelist' %}">branch administration</a>, then return to inventory.</p></div>{% else %}
+<div class="inventory-toolbar">
+ <form method="get" class="inventory-search" role="search">
+  {% if branches %}<label for="branch-choice">Branch</label><select id="branch-choice" class="inventory-input" name="branch">{% for candidate in branches %}<option value="{{ candidate.id }}" {% if candidate.id == branch.id %}selected{% endif %}>{{ candidate.name }} ({{ candidate.code }})</option>{% endfor %}</select>{% else %}<strong>{{ branch.name }}</strong>{% endif %}
+  <label class="sr-only" for="stock-search">Search stock</label><input id="stock-search" class="inventory-input" name="q" value="{{ query }}" placeholder="Product, SKU or barcode"><button class="button button-primary" type="submit">Filter</button>
+ </form><div class="inventory-actions"><a class="button button-soft" href="{% url 'inventory:movements' %}?branch={{ branch.pk }}">Movement history</a><a class="button button-soft" href="{% url 'inventory:product_list' %}">Catalogue</a></div>
+</div>
+<div class="inventory-panel"><div class="inventory-panel-title"><h2>{{ branch.name }} stock</h2><span>{{ page.paginator.count }} products</span></div>
+<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>Product</th><th>SKU</th><th>Available</th><th>Reorder at</th><th>Status</th><th>Manage</th></tr></thead><tbody>
+{% for row in rows %}<tr><td><a class="inventory-strong-link" href="{% url 'inventory:product_detail' row.product.id %}">{{ row.product.name }}</a><small>{{ row.product.category.name }}</small></td><td>{{ row.product.sku }}</td><td><strong>{{ row.quantity|floatformat:-3 }}</strong></td><td>{{ row.product.reorder_level|floatformat:-3 }}</td><td>{% if row.low %}<span class="inventory-pill danger">Low stock</span>{% else %}<span class="inventory-pill">In stock</span>{% endif %}</td><td><a class="inventory-strong-link" href="{% url 'inventory:stock_change' row.product.id %}?branch={{ branch.pk }}">Record stock →</a></td></tr>
+{% empty %}<tr><td colspan="6" class="inventory-empty">No products found. Add products from the Catalogue.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% if page.has_other_pages %}<div class="inventory-pagination">{% if page.has_previous %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}</div>{% endif %}
+{% endif %}
+{% endblock %}

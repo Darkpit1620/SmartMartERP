@@ -1,0 +1,8 @@
+# Install with your existing pinned Django requirements on the LINUX deployment host.
+# Preserve the Django 5.2 compatibility range used by SmartMart ERP.
+Django>=5.2,<5.3
+dj-database-url>=2.2,<4
+psycopg[binary]>=3.2,<4
+whitenoise>=6.7,<7
+# Linux hosting only (do not use Gunicorn directly on native Windows):
+gunicorn>=22,<24; platform_system != "Windows"

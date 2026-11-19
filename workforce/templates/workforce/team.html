@@ -1,0 +1,7 @@
+{% extends 'workforce/layout.html' %}
+{% block hr_title %}Staff Directory{% endblock %}
+{% block hr_heading %}Employee Directory{% endblock %}
+{% block hr_subheading %}Your authorized branch team and their assigned store roles.{% endblock %}
+{% block hr_content %}<div class="hr-card hr-section hr-scroll"><table class="hr-table"><thead><tr><th>Employee</th><th>Employee number</th><th>Branch</th><th>Role</th><th>Status</th></tr></thead><tbody>
+{% for profile in profiles %}<tr><td><strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong><br><small>{{ profile.user.username }}</small></td><td>{{ profile.employee_id|default:'—' }}</td><td>{{ profile.branch.name|default:'Unassigned' }}</td><td>{{ profile.get_role_display }}</td><td>{% if profile.is_approved %}Approved{% else %}Pending approval{% endif %}</td></tr>{% empty %}<tr><td colspan="5">No employees found.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

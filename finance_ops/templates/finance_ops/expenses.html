@@ -1,0 +1,24 @@
+{% extends 'finance_ops/layout.html' %}
+{% block finance_title %}Operating Expenses{% endblock %}
+{% block finance_heading %}Operating expenses{% endblock %}
+{% block finance_subheading %}Review and track costs by branch, category and authorization status.{% endblock %}
+{% block finance_content %}
+<div class="sf-title sf-expense-heading"><div><span class="sf-eyebrow">EXPENSE LEDGER</span><h2>Recorded branch expenses</h2></div><a class="button button-primary" href="{% url 'finance_ops:new_expense' %}">+ Record expense</a></div>
+<div class="sf-tabs">
+  <a href="{% url 'finance_ops:expenses' %}?status=ALL" {% if status == 'ALL' %}class="selected"{% endif %}>All</a>
+  <a href="{% url 'finance_ops:expenses' %}?status=PENDING" {% if status == 'PENDING' %}class="selected"{% endif %}>Pending</a>
+  <a href="{% url 'finance_ops:expenses' %}?status=APPROVED" {% if status == 'APPROVED' %}class="selected"{% endif %}>Approved</a>
+  <a href="{% url 'finance_ops:expenses' %}?status=REJECTED" {% if status == 'REJECTED' %}class="selected"{% endif %}>Rejected</a>
+</div>
+<section class="sf-panel"><div class="sf-scroll"><table class="sf-table"><thead><tr><th>Date</th><th>Branch</th><th>Category</th><th>Description / Reference</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+{% for item in expenses %}<tr>
+  <td>{{ item.incurred_on|date:'d M Y' }}</td><td>{{ item.branch.code }}</td><td>{{ item.get_category_display }}</td><td>{{ item.description }}{% if item.reference %}<small>{{ item.reference }}</small>{% endif %}<small>By {{ item.recorded_by.username }}</small></td>
+  <td><strong>KES {{ item.amount|floatformat:2 }}</strong></td>
+  <td><span class="sf-pill">{{ item.get_status_display }}</span>{% if item.reviewed_by %}<small>By {{ item.reviewed_by.username }}</small>{% endif %}{% if item.review_note %}<small>{{ item.review_note }}</small>{% endif %}</td>
+  <td>{% if is_head_office and item.status == 'PENDING' %}
+    <form method="post" action="{% url 'finance_ops:review' item.pk %}" class="sf-review-form">{% csrf_token %}<input name="note" maxlength="350" placeholder="Optional review note" aria-label="Review note"><button name="action" value="approve" type="submit" class="sf-approve">Approve</button><button name="action" value="reject" type="submit" class="sf-reject">Reject</button></form>
+  {% else %}<span class="sf-muted">—</span>{% endif %}</td>
+</tr>{% empty %}<tr><td colspan="7">No expenses match your selection.</td></tr>{% endfor %}
+</tbody></table></div></section>
+<p class="sf-disclaimer">Expenses are recorded for approval; this is not a bank-payment system. Only head-office administrators can approve expenses. The reporting dashboard counts approved entries separately from those pending approval.</p>
+{% endblock %}

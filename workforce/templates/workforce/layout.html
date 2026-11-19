@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{% block hr_title %}Workforce{% endblock %} | SmartMart ERP{% endblock %}
+{% block content %}
+<section class="hr-page"><div class="wrap">
+  <div class="hr-crumb"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><a href="{% url 'workforce:home' %}">HR &amp; Attendance</a></div>
+  {% if messages %}{% for message in messages %}<div class="hr-alert {% if message.tags == 'error' %}hr-error{% endif %}">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="hr-header"><div><span class="hr-eyebrow">SMARTMART PEOPLE OPERATIONS</span><h1>{% block hr_heading %}HR &amp; Attendance{% endblock %}</h1><p>{% block hr_subheading %}Your employee workspace{% endblock %}</p></div><span class="hr-symbol">◷</span></div>
+  <nav class="hr-tabs" aria-label="HR navigation">
+    <a href="{% url 'workforce:home' %}">My attendance</a>
+    <a href="{% url 'workforce:my_leaves' %}">My leave</a>
+    {% if user.is_superuser or user.store_profile.role == 'MANAGER' %}
+      <a href="{% url 'workforce:team' %}">Staff directory</a>
+      <a href="{% url 'workforce:team_attendance' %}">Team attendance</a>
+      <a href="{% url 'workforce:team_leaves' %}">Leave approvals</a>
+    {% endif %}
+  </nav>
+  {% block hr_content %}{% endblock %}
+</div></section>
+{% endblock %}

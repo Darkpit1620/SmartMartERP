@@ -1,0 +1,6 @@
+{% extends 'transfers/layout.html' %}
+{% block title %}New Stock Transfer | SmartMart ERP{% endblock %}
+{% block transfer_content %}
+<div class="transfer-page-head"><div><span class="transfer-eyebrow">SOURCE BRANCH</span><h1>Create a Stock Transfer</h1><p>Choose where the products will go. Stock will not change until warehouse dispatch.</p></div></div>
+<div class="transfer-panel transfer-narrow"><form method="post" class="transfer-form">{% csrf_token %}{% if branch %}<div class="transfer-note"><strong>Sending branch:</strong> {{ branch.name }}</div>{% endif %}{% if form.non_field_errors %}<div class="transfer-error">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="transfer-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="transfer-error">{{ error }}</small>{% endfor %}</div>{% endfor %}<button class="button button-primary" type="submit">Create draft transfer</button><a class="button button-outline" href="{% url 'transfers:list' %}">Cancel</a></form></div>
+{% endblock %}

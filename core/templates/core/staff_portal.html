@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ workspace.name }} Portal | SmartMart ERP
+<!-- SMARTMART_POS_STAFF -->
+{% if profile.role == "CASHIER" or profile.role == "MANAGER" %}<div class="wrap" style="margin-top:22px;margin-bottom:32px"><div class="profile-strip"><div><strong>Point of Sale is available</strong><p>Scan products, complete checkout, and print receipts for your branch.</p></div><div><a class="button button-primary" href="{% url 'pos:index' %}">Open Cashier POS →</a> <a class="button button-soft" href="{% url 'pos:sales' %}">Sales &amp; receipts</a></div></div></div>{% endif %}
+
+<!-- SMARTMART_TRADE_STAFF -->
+{% if profile.role == "MANAGER" or profile.role == "WAREHOUSE" %}<div class="wrap" style="margin-top:18px;margin-bottom:30px"><div class="profile-strip"><div><strong>Suppliers &amp; Purchasing</strong><p>Receive supplier deliveries and manage bulk orders for your assigned branch.</p></div><a class="button button-primary" href="{% url 'trading:home' %}">Open wholesale &amp; purchasing →</a></div></div>{% endif %}
+
+<!-- SMARTMART_TRANSFER_STAFF -->
+{% if profile.role == 'MANAGER' or profile.role == 'WAREHOUSE' %}<div class="wrap" style="margin-top:18px;margin-bottom:28px"><div class="profile-strip"><div><strong>Warehouse &amp; Branch Transfers</strong><p>View shipments, dispatch stock and confirm deliveries for your branch.</p></div><a class="button button-primary" href="{% url 'transfers:list' %}">Manage branch transfers →</a></div></div>{% endif %}
+{% endblock %}
+{% block content %}
+<div class="dashboard-area"><div class="wrap"><div class="breadcrumbs"><a href="{% url 'core:home' %}">SmartMart ERP</a><span>›</span><span>{{ workspace.name }} Workspace</span></div>
+<section class="dashboard-hero"><div><div class="eyebrow">APPROVED EMPLOYEE WORKSPACE</div><h1>Good to see you, {{ user.first_name|default:user.username }}.</h1><p>{{ workspace.tagline }}</p><span class="dashboard-tag">{{ workspace.name }} · {{ profile.branch.name|default:'Branch not assigned' }}</span></div><span class="hero-decoration" aria-hidden="true">▦</span></section>
+<div class="dashboard-heading"><div><div class="section-eyebrow">YOUR DAILY TOOLS</div><h2>{{ workspace.name }} Dashboard</h2></div><span class="status-label"><span class="live-dot"></span> Account approved</span></div>
+<div class="dashboard-cards">{% for title, description, icon in workspace.modules %}<section class="dashboard-card"><div class="card-icon {% cycle 'green' 'blue' 'orange' %}">◈</div><h3>{{ title }}</h3><p>{{ description }}</p><!-- SMARTMART_POS_MODULE_CARD -->{% if profile.role == "CASHIER" and title == "Checkout / POS" %}<a class="dashboard-card-link" href="{% url 'pos:index' %}">Launch Checkout →</a>{% elif profile.role == "MANAGER" and title == "Sales overview" %}<a class="dashboard-card-link" href="{% url 'pos:sales' %}">View Branch Sales →</a>{% else %}<span class="coming-soon">Planned module · Coming next</span>{% endif %}</section>{% endfor %}</div>
+<!-- SMARTMART_STAGE3_STAFF -->
+{% if profile.role == "WAREHOUSE" or profile.role == "MANAGER" %}<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">▥</div><h3>My Branch Inventory</h3><p>See stock levels, reorder alerts and receive new deliveries.</p><a class="dashboard-card-link" href="{% url 'inventory:stock_list' %}">Open branch stock →</a></section><section class="dashboard-card"><div class="card-icon blue">≡</div><h3>Stock Movement History</h3><p>Review stock receipts and adjustments at your branch.</p><a class="dashboard-card-link" href="{% url 'inventory:movements' %}">View movement history →</a></section><section class="dashboard-card"><div class="card-icon orange">▦</div><h3>Product Lookup</h3><p>Find items by name, SKU or barcode.</p><a class="dashboard-card-link" href="{% url 'inventory:product_list' %}">Browse products →</a></section></div>{% else %}<div class="profile-strip"><div><strong>Product Lookup</strong><p>Find a product, barcode and current retail price.</p></div><a class="button button-soft" href="{% url 'inventory:product_list' %}">Browse products →</a></div>{% endif %}
+<div class="profile-strip"><div><strong>Employee account</strong><p>Username: {{ user.username }}{% if profile.employee_id %} · Employee ID: {{ profile.employee_id }}{% endif %}</p></div><div><strong>Assigned branch</strong><p>{{ profile.branch.name|default:'To be assigned by administrator' }}</p></div><div><strong>Access level</strong><p>{{ profile.get_role_display }}</p></div></div>
+</div></div>
+
+<!-- SMARTMART_HR_STAFF -->
+<div class="wrap" style="padding-top:18px;padding-bottom:30px"><div class="profile-strip"><div><strong>My HR &amp; Attendance</strong><p>Check in, view your shifts and request leave. Branch managers can review staff leave.</p></div><a class="button button-primary" href="{% url 'workforce:home' %}">Open My HR →</a></div></div>
+
+<!-- SMARTMART_FINANCE_MANAGER -->
+{% if profile.role == "MANAGER" %}<section class="wrap" style="padding-top:15px;padding-bottom:30px"><div class="profile-strip"><div><strong>Branch Finance &amp; Reports</strong><p>Review your branch sales, submit expenses and monitor payment verification.</p></div><a class="button button-primary" href="{% url 'finance_ops:overview' %}">Open branch finance →</a></div></section>{% endif %}
+{% endblock %}

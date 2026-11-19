@@ -1,0 +1,43 @@
+{% extends 'finance_ops/layout.html' %}
+{% block finance_title %}Financial Overview{% endblock %}
+{% block finance_heading %}Financial overview{% endblock %}
+{% block finance_subheading %}Recorded POS revenue, payment confirmation, and approved branch expenses.{% endblock %}
+{% block finance_content %}
+<form class="sf-filters" method="get" action="{% url 'finance_ops:overview' %}">
+  <label>From<input type="date" name="start" value="{{ start|date:'Y-m-d' }}" required></label>
+  <label>Through<input type="date" name="end" value="{{ end|date:'Y-m-d' }}" required></label>
+  {% if is_head_office %}<label>Branch<select name="branch"><option value="">All branches</option>{% for option in branches %}<option value="{{ option.pk }}" {% if branch_filter.pk == option.pk %}selected{% endif %}>{{ option.name }}</option>{% endfor %}</select></label>{% endif %}
+  <button type="submit" class="button button-dark">Apply filters</button>
+  <a class="button button-outline" href="{% url 'finance_ops:export_report' %}?start={{ start|date:'Y-m-d' }}&amp;end={{ end|date:'Y-m-d' }}{% if branch_filter and is_head_office %}&amp;branch={{ branch_filter.pk }}{% endif %}">Download CSV</a>
+</form>
+<section class="sf-kpi-grid" aria-label="Financial totals">
+  <article class="sf-kpi"><span>Recorded POS sales</span><strong>KES {{ summary.recorded_sales|floatformat:2 }}</strong><small>{{ summary.sale_count }} completed sales, including unverified payments</small></article>
+  <article class="sf-kpi sf-accent"><span>Confirmed receipts</span><strong>KES {{ summary.confirmed_receipts|floatformat:2 }}</strong><small>Cash received and independently verified payments</small></article>
+  <article class="sf-kpi sf-warning"><span>Awaiting payment verification</span><strong>KES {{ summary.unverified_receipts|floatformat:2 }}</strong><small>M-Pesa, card or bank references not yet confirmed</small></article>
+  <article class="sf-kpi"><span>Approved operating expenses</span><strong>KES {{ summary.approved_expenses|floatformat:2 }}</strong><small>Approved expense entries only; not necessarily paid</small></article>
+</section>
+<section class="sf-split">
+  <article class="sf-panel"><div class="sf-title"><div><span class="sf-eyebrow">SALES MIX</span><h2>Retail and wholesale</h2></div></div>
+    <div class="sf-metric"><span>Retail sales recorded</span><strong>KES {{ summary.retail_sales|floatformat:2 }}</strong></div>
+    <div class="sf-metric"><span>Wholesale sales recorded</span><strong>KES {{ summary.wholesale_sales|floatformat:2 }}</strong></div>
+    <div class="sf-metric"><span>Expenses awaiting review</span><strong>KES {{ summary.pending_expenses|floatformat:2 }}</strong></div>
+    <a href="{% url 'finance_ops:expenses' %}?status=PENDING" class="sf-action">Review {{ summary.pending_expense_count }} pending expenses →</a>
+  </article>
+  <article class="sf-panel"><div class="sf-title"><div><span class="sf-eyebrow">LAST 14 DAYS IN PERIOD</span><h2>Daily recorded sales</h2></div></div>
+    <div class="sf-daily">{% for day in daily %}<div class="sf-day"><span>{{ day.day|date:'d M' }}</span><div class="sf-track"><div class="sf-bar" style="width:{{ day.width }}%" aria-label="KES {{ day.amount|floatformat:2 }}"></div></div><strong>{{ day.amount|floatformat:0 }}</strong></div>{% endfor %}</div>
+  </article>
+</section>
+<section class="sf-panel"><div class="sf-title"><div><span class="sf-eyebrow">BRANCH PERFORMANCE</span><h2>Branch comparison</h2></div></div>
+  <div class="sf-scroll"><table class="sf-table"><thead><tr><th>Branch</th><th>Transactions</th><th>Recorded sales</th><th>Confirmed receipts</th><th>Approved expenses</th></tr></thead><tbody>
+    {% for row in branch_rows %}<tr><td><strong>{{ row.branch.name }}</strong><small>{{ row.branch.code }}</small></td><td>{{ row.transactions }}</td><td>KES {{ row.recorded|floatformat:2 }}</td><td>KES {{ row.confirmed|floatformat:2 }}</td><td>KES {{ row.expenses|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="5">No branches have been created.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="sf-panel"><div class="sf-title"><div><span class="sf-eyebrow">RECENT ACTIVITY</span><h2>Latest POS receipts</h2></div><a href="{% url 'pos:sales' %}" class="sf-action">Sales history →</a></div>
+  <div class="sf-scroll"><table class="sf-table"><thead><tr><th>Receipt</th><th>Branch</th><th>Sale type</th><th>Date</th><th>Payment status</th><th>Amount</th></tr></thead><tbody>
+    {% for sale in sales %}<tr><td>{{ sale.receipt_number|default:'Pending reference' }}</td><td>{{ sale.branch.code }}</td><td>{{ sale.get_sale_type_display }}</td><td>{{ sale.created_at|date:'d M Y H:i' }}</td><td><span class="sf-pill">{{ sale.get_payment_status_display }}</span></td><td>KES {{ sale.subtotal|floatformat:2 }}</td></tr>
+    {% empty %}<tr><td colspan="6">No recorded sales for the selected reporting period.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<p class="sf-disclaimer"><strong>Accounting note:</strong> These figures are operational summaries, not audited accounts or net profit. POS recorded totals may include unverified payments. Expenses are recorded when incurred, not necessarily when paid. Inventory costs, supplier liabilities, returns, payroll taxes, and VAT filings need separate accounting treatment.</p>
+{% endblock %}

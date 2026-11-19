@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Receipt {{ sale.receipt_number }} | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'pos/css/pos.css' %}">
+<div class="pos-shell"><div class="wrap"><div class="breadcrumbs no-print"><a href="{% url 'pos:index' %}">Checkout</a><span>›</span><span>Receipt</span></div>
+  {% if messages %}<div class="pos-alerts no-print">{% for message in messages %}<div class="pos-alert">{{ message }}</div>{% endfor %}</div>{% endif %}
+  <div class="pos-receipt-actions no-print"><a href="{% url 'pos:index' %}" class="button button-soft">← New sale</a><a href="{% url 'pos:sales' %}" class="button button-soft">Sales history</a><button onclick="window.print()" class="button button-primary">Print receipt</button></div>
+  <section class="pos-receipt"><div class="pos-receipt-brand"><span>▦</span><h1>SmartMart ERP</h1><p>{{ sale.branch.name }}</p><p>{{ sale.branch.address }}</p>{% if sale.branch.phone %}<p>{{ sale.branch.phone }}</p>{% endif %}</div>
+    <div class="pos-receipt-meta"><div><span>Receipt</span><strong>{{ sale.receipt_number }}</strong></div><div><span>Date</span><strong>{{ sale.created_at|date:'d M Y, H:i' }}</strong></div><div><span>Cashier</span><strong>{{ sale.cashier.username }}</strong></div><div><span>Sale type</span><strong>{{ sale.get_sale_type_display }}</strong></div></div>
+    <table class="pos-receipt-table"><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.description }}<small>{{ item.sku }}</small></td><td>{{ item.quantity|floatformat:-3 }}</td><td>{{ item.unit_price|floatformat:2 }}</td><td>{{ item.line_total|floatformat:2 }}</td></tr>{% endfor %}</tbody></table>
+    <div class="pos-receipt-final"><div><span>Included tax (estimated)</span><strong>KES {{ sale.included_tax|floatformat:2 }}</strong></div><div class="total"><span>TOTAL</span><strong>KES {{ sale.subtotal|floatformat:2 }}</strong></div><div><span>Payment</span><strong>{{ sale.get_payment_method_display }}</strong></div>{% if sale.payment_reference %}<div><span>Provider reference</span><strong>{{ sale.payment_reference }}</strong></div>{% endif %}<div><span>Payment status</span><strong>{{ sale.get_payment_status_display }}</strong></div>{% if sale.payment_method == 'CASH' %}<div><span>Cash received</span><strong>KES {{ sale.tendered_amount|floatformat:2 }}</strong></div><div><span>Change</span><strong>KES {{ sale.change_due|floatformat:2 }}</strong></div>{% endif %}</div>
+    <div class="pos-receipt-thanks">Thank you for shopping with us.<p>This is a POS receipt, not a fiscal/eTIMS tax invoice.</p>{% if sale.payment_status == 'UNVERIFIED' %}<p class="pos-receipt-warning">Payment reference is not independently verified.</p>{% endif %}</div>
+  </section>
+  {% if can_verify and sale.payment_status == 'UNVERIFIED' %}<div class="pos-verify no-print"><h2>Manager payment review</h2><p>Confirm the payment directly with the provider or bank before marking it verified. This does not initiate a payment.</p><form action="{% url 'pos:verify_payment' sale.pk %}" method="post">{% csrf_token %}<label><input type="checkbox" name="confirmed" value="yes" required> I checked the payment independently</label><button class="button button-dark" type="submit">Mark verified</button></form></div>{% endif %}
+</div></div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'inventory/layout.html' %}
+{% block title %}Record Stock | SmartMart ERP{% endblock %}
+{% block inventory_content %}
+<section class="inventory-banner"><div><div class="eyebrow">AUTHORIZED STOCK MOVEMENT</div><h1>{{ product.name }}</h1><p>{{ branch.name }} · SKU {{ product.sku }}</p></div><div class="inventory-symbol">↕</div></section>
+<div class="inventory-stat-row"><div class="inventory-stat"><strong>{{ on_hand|floatformat:-3 }}</strong><span>Currently on hand</span></div><div class="inventory-stat"><strong>{{ product.reorder_level|floatformat:-3 }}</strong><span>Reorder threshold</span></div></div>
+<div class="inventory-panel inventory-form-panel"><a class="inventory-strong-link" href="{% url 'inventory:stock_list' %}?branch={{ branch.pk }}">← Back to branch stock</a><h2>Record receipt or adjustment</h2><p class="inventory-help">Choose "Stock received" for deliveries. Use corrections for counted differences. Every change is recorded with your username and a reference.</p><form method="post" class="inventory-form" novalidate>{% csrf_token %}{% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="inventory-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="inventory-error">{{ error }}</small>{% endfor %}</div>{% endfor %}<button type="submit" class="button button-primary">Save stock movement</button></form></div>
+{% endblock %}

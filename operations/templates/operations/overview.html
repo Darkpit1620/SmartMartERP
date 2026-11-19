@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}System Readiness | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'operations/css/operations.css' %}">
+<div class="wrap op-wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:admin_portal' %}">Administrator</a><span>›</span><span>System readiness</span></div>
+  <section class="op-hero"><span class="op-kicker">HEAD OFFICE · PRIVATE</span><h1>System readiness &amp; operations</h1>
+    <p>Live counts from your database. This page does not alter products, stock, sales, payments, employees or expenses.</p>
+    <span class="op-tag">{% if deployment_ready %}Configuration checks passed{% else %}Production setup requires attention{% endif %}</span>
+  </section>
+  <h2>Live system summary</h2>
+  <div class="op-grid">
+    <div class="op-tile"><span>Active branches</span><strong>{{ data.active_branches }}</strong></div>
+    <div class="op-tile"><span>Products in catalogue</span><strong>{{ data.products }}</strong></div>
+    <div class="op-tile"><span>Completed sales records</span><strong>{{ data.sales }}</strong></div>
+    <div class="op-tile"><span>Recorded stock movements</span><strong>{{ data.stock_movements }}</strong></div>
+    <div class="op-tile"><span>Wholesale orders</span><strong>{{ data.wholesale_orders }}</strong></div>
+    <div class="op-tile"><span>Supplier purchase orders</span><strong>{{ data.purchase_orders }}</strong></div>
+    <div class="op-tile"><span>Unverified payments</span><strong>{{ data.unverified_payments }}</strong></div>
+    <div class="op-tile"><span>Pending expenses</span><strong>{{ data.pending_expenses }}</strong></div>
+  </div>
+  <div class="op-columns">
+    <section class="op-panel"><h2>Operational items to review</h2>
+      {% if findings %}<ul class="op-list">{% for item in findings %}<li><span class="op-pill {% if item.severity == 'critical' %}op-danger{% endif %}">{{ item.count }}</span>{{ item.label }}</li>{% endfor %}</ul>
+      {% else %}<p>No flagged records in the current snapshot.</p>{% endif %}
+      <p class="op-muted">Open orders and unverified payments are review items, not necessarily system errors.</p>
+    </section>
+    <section class="op-panel"><h2>Production settings</h2>
+      <ul class="op-list">{% for item in flags %}<li><span class="op-pill {% if not item.ok %}op-warning{% endif %}">{% if item.ok %}OK{% else %}SETUP{% endif %}</span><div>{{ item.label }}<small>{{ item.detail }}</small></div></li>{% endfor %}</ul>
+      <p class="op-muted">Local development normally shows warnings here. Do not turn on HTTPS redirects until a real HTTPS deployment is configured.</p>
+    </section>
+  </div>
+  <section class="op-panel"><h2>Backup and final testing</h2>
+    <p>In the VS Code terminal, run <code>python smartmart_backup.py</code> to back up the SQLite database and uploaded media outside this project.</p>
+    <p>Run <code>python manage.py test</code> for application tests and <code>python manage.py check --deploy</code> for Django's deployment warnings.</p>
+    <p class="op-muted">A green dashboard is not a production certification. Real payment gateway verification, tax invoicing, refunds and recovery rehearsals still require separate checks.</p>
+  </section>
+</div>
+{% endblock %}

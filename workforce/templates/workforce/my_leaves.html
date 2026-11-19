@@ -1,0 +1,10 @@
+{% extends 'workforce/layout.html' %}
+{% block hr_title %}My Leave{% endblock %}
+{% block hr_heading %}My Leave Requests{% endblock %}
+{% block hr_subheading %}See leave decisions and submit a new request to your manager.{% endblock %}
+{% block hr_content %}
+<div class="hr-actions"><a class="hr-button" href="{% url 'workforce:request_leave' %}">+ Request leave</a></div>
+<div class="hr-card hr-section hr-scroll"><table class="hr-table"><thead><tr><th>Type</th><th>Dates</th><th>Status</th><th>Manager's note</th><th></th></tr></thead><tbody>
+{% for item in requests %}<tr><td>{{ item.get_leave_type_display }}</td><td>{{ item.starts_on }} – {{ item.ends_on }}</td><td><span class="hr-pill">{{ item.get_status_display }}</span></td><td>{{ item.review_note|default:'—' }}</td><td>{% if item.status == 'PENDING' %}<form method="post" action="{% url 'workforce:cancel_leave' item.pk %}">{% csrf_token %}<button class="hr-small-danger" type="submit">Cancel</button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="5">No leave requests yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

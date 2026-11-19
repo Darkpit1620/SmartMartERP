@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+{% block title %}Transaction Verification | SmartMart ERP{% endblock %}
+{% block content %}
+<style>
+.sm10c-wrap{max-width:1100px;margin:32px auto;padding:0 20px 45px;color:#243448}
+.sm10c-hero{border-radius:24px;background:#eaf8f2;padding:32px;border:1px solid #c6ebd9}
+.sm10c-hero h1{margin:0 0 10px;color:#124f38;font-size:clamp(28px,4vw,42px)}
+.sm10c-hero p{max-width:780px;margin:0;line-height:1.6;color:#375e4d}
+.sm10c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin:22px 0 28px}
+.sm10c-stat{background:#fff;border:1px solid #dfe8e4;border-radius:16px;padding:18px;box-shadow:0 5px 22px #2434480a}
+.sm10c-stat strong{display:block;color:#133c31;font-size:29px;margin:0 0 6px}
+.sm10c-stat span{color:#687a76;font-size:13px}
+.sm10c-panel{background:#fff;border:1px solid #dfe8e4;border-radius:20px;padding:24px;margin:20px 0}
+.sm10c-panel h2{margin:0 0 14px;color:#163d35}
+.sm10c-panel p,.sm10c-panel li{line-height:1.6;color:#4e645d}
+.sm10c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.sm10c-link{display:inline-block;text-decoration:none;padding:10px 14px;border:1px solid #b6dccc;border-radius:10px;background:#f1fbf6;color:#125d42;font-weight:700;font-size:13px}
+.sm10c-command{display:block;white-space:pre-wrap;word-break:break-word;padding:14px 16px;border-radius:10px;background:#132c28;color:#e5fff0;font-family:Consolas,monospace;font-size:14px}
+.sm10c-note{border-left:4px solid #c38e38;background:#fff8ea;padding:14px;margin-top:16px;border-radius:6px;color:#71531a}
+@media(max-width:600px){.sm10c-hero,.sm10c-panel{padding:20px}}
+</style>
+<div class="sm10c-wrap">
+  <div class="sm10c-hero">
+    <p style="text-transform:uppercase;font-weight:800;letter-spacing:.1em;font-size:12px;margin-bottom:8px">Head office · Stage 10C</p>
+    <h1>Transaction Verification</h1>
+    <p>Check purchasing, goods receiving, checkout, wholesale, branch transfers and expense approval. The figures below reflect your existing SmartMart database. Automated scenarios run in a separate temporary test database.</p>
+  </div>
+  <div class="sm10c-grid">
+    <div class="sm10c-stat"><strong>{{ snapshot.branches }}</strong><span>Active branches</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.catalogue_products }}</strong><span>Catalogue products</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.priced_products }}</strong><span>Retail-priced products</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.stock_lines }}</strong><span>Branch stock records</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.approved_staff }}</strong><span>Approved staff</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.sales }}</strong><span>Recorded POS sales</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.unverified_payments }}</strong><span>Payments to verify</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.purchase_orders }}</strong><span>Purchase orders</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.goods_receipts }}</strong><span>Supplier deliveries</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.wholesale_orders }}</strong><span>Wholesale orders</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.open_transfers }}</strong><span>Transfers awaiting receipt</span></div>
+    <div class="sm10c-stat"><strong>{{ snapshot.pending_expenses }}</strong><span>Expenses awaiting approval</span></div>
+  </div>
+  <div class="sm10c-panel">
+    <h2>Run automated end-to-end checks</h2>
+    <p>In VS Code PowerShell, run these commands one at a time. Django uses a disposable test database; they do not create real sales, shipments or expenses.</p>
+    <code class="sm10c-command">python manage.py test transaction_checks --noinput</code>
+    <p>Then verify all installed modules:</p>
+    <code class="sm10c-command">python manage.py test --noinput</code>
+    <p>Finally inspect actual business records:</p>
+    <code class="sm10c-command">python manage.py smartmart_audit</code>
+    <div class="sm10c-note">A passing test does not prove real payment settlement, compliance with tax invoicing rules or production readiness. Continue to verify a training-branch sale through the actual cashier screen.</div>
+  </div>
+  <div class="sm10c-panel">
+    <h2>Manual workflow checklist</h2>
+    <ol>
+      <li>Create a supplier purchase order. Confirm no stock change before delivery.</li>
+      <li>Receive goods into the training branch. Confirm stock rises by the received amount.</li>
+      <li>Make a retail cash sale. Confirm a receipt exists and stock falls once.</li>
+      <li>Make a wholesale sale at the correct price and minimum quantity.</li>
+      <li>Transfer training stock to another training branch. Verify in-transit and received quantities.</li>
+      <li>Record an expense. Confirm it remains pending until head-office approval.</li>
+      <li>Verify a cashier cannot access other branches' managerial pages.</li>
+    </ol>
+    <div class="sm10c-actions">
+      <a class="sm10c-link" href="{% url 'pos:index' %}">Open POS</a>
+      <a class="sm10c-link" href="{% url 'trading:home' %}">Purchasing &amp; Wholesale</a>
+      <a class="sm10c-link" href="{% url 'transfers:list' %}">Branch Transfers</a>
+      <a class="sm10c-link" href="{% url 'finance_ops:overview' %}">Finance Reports</a>
+      <a class="sm10c-link" href="{% url 'operations:overview' %}">System Readiness</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

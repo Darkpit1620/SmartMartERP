@@ -1,0 +1,11 @@
+{% extends 'inventory/layout.html' %}
+{% block title %}Stock Audit Trail | SmartMart ERP{% endblock %}
+{% block inventory_content %}
+<section class="inventory-banner"><div><div class="eyebrow">INVENTORY AUDIT TRAIL</div><h1>Stock movement history</h1><p>{% if branch %}{{ branch.name }}{% else %}No active branch yet{% endif %} · Receipts and corrections with employee references.</p></div><div class="inventory-symbol">≡</div></section>
+<div class="inventory-toolbar"><a class="button button-soft" href="{% url 'inventory:stock_list' %}{% if branch %}?branch={{ branch.pk }}{% endif %}">← Branch stock</a></div>
+<div class="inventory-panel"><div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>When</th><th>Product</th><th>Action</th><th>Quantity</th><th>Resulting balance</th><th>Reference</th><th>Recorded by</th></tr></thead><tbody>
+{% for m in page %}<tr><td>{{ m.created_at|date:'d M Y H:i' }}</td><td>{{ m.product.name }}<small>{{ m.product.sku }}</small></td><td>{{ m.get_kind_display }}</td><td>{{ m.quantity|floatformat:-3 }}</td><td>{{ m.balance_after|floatformat:-3 }}</td><td>{{ m.reference }}</td><td>{{ m.recorded_by.username }}</td></tr>
+{% empty %}<tr><td colspan="7" class="inventory-empty">No stock movements recorded yet.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% if page.has_other_pages %}<div class="inventory-pagination">{% if page.has_previous %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="dashboard-area inventory-area">
+  <div class="wrap">
+    <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><span>Products &amp; Inventory</span></div>
+    {% if messages %}<div aria-live="polite" class="inventory-flashes">
+      {% for message in messages %}<div class="inventory-flash">{{ message }}</div>{% endfor %}
+    </div>{% endif %}
+    {% block inventory_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

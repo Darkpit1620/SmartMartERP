@@ -1,0 +1,6 @@
+{% extends 'inventory/layout.html' %}
+{% block title %}{{ heading }} | SmartMart ERP{% endblock %}
+{% block inventory_content %}
+<section class="inventory-banner"><div><div class="eyebrow">CATALOGUE MANAGEMENT</div><h1>{{ heading }}</h1><p>{{ subheading }}</p></div><div class="inventory-symbol">＋</div></section>
+<div class="inventory-panel inventory-form-panel"><a class="inventory-strong-link" href="{{ back_url }}">← Go back</a><form method="post" class="inventory-form" novalidate>{% csrf_token %}{% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="inventory-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="inventory-error">{{ error }}</small>{% endfor %}</div>{% endfor %}<button type="submit" class="button button-primary">{{ button_text }}</button></form></div>
+{% endblock %}

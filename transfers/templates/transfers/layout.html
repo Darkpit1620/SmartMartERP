@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<div class="dashboard-area transfer-area"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><a href="{% url 'transfers:list' %}">Branch transfers</a></div>
+  {% if messages %}<div class="transfer-messages" role="status" aria-live="polite">{% for message in messages %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}
+  {% block transfer_content %}{% endblock %}
+</div></div>
+{% endblock %}

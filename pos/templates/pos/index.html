@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Cashier POS | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'pos/css/pos.css' %}">
+<div class="pos-shell"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><span>Checkout / POS</span></div>
+  <div class="pos-heading"><div><div class="section-eyebrow">SMARTMART POINT OF SALE</div><h1>Fast, secure checkout</h1><p>Look up products by name, SKU or scanned barcode. Complete sales without losing stock control.</p></div>
+    <a class="button button-soft" href="{% url 'pos:sales' %}">Sales &amp; receipts ↗</a></div>
+  {% if messages %}<div class="pos-alerts" role="status">{% for message in messages %}<div class="pos-alert pos-alert-{{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% if not branch %}<section class="pos-empty"><h2>No active branch configured</h2><p>Create an active branch in Django Administration before selling products.</p><a href="{% url 'core:dashboard' %}" class="button button-soft">Back to workspace</a></section>
+  {% else %}
+  <div class="pos-topbar"><div><strong>Branch:</strong> {{ branch.name }} <span class="pos-muted">({{ branch.code }})</span></div>
+    {% if user.is_superuser %}<form method="get" action="{% url 'pos:index' %}" class="pos-branch-choice"><label for="branch-select">Change branch</label><select id="branch-select" name="branch" onchange="this.form.submit()">{% for option in branches %}<option value="{{ option.pk }}" {% if option.pk == branch.pk %}selected{% endif %}>{{ option.name }}</option>{% endfor %}</select></form>{% endif %}
+    <form method="post" action="{% url 'pos:set_mode' %}" class="pos-mode-form">{% csrf_token %}<label for="pos-sale-type">Pricing</label><select id="pos-sale-type" name="sale_type" onchange="this.form.submit()"><option value="RETAIL" {% if mode == 'RETAIL' %}selected{% endif %}>Retail</option><option value="WHOLESALE" {% if mode == 'WHOLESALE' %}selected{% endif %}>Wholesale</option></select></form>
+  </div>
+  <div class="pos-grid">
+    <section class="pos-panel pos-product-panel"><div class="pos-panel-heading"><h2>Find products</h2><span class="pos-tag">Barcode scanner ready</span></div>
+      <form method="get" action="{% url 'pos:index' %}" class="pos-search-form"><label for="barcode-search" class="sr-only">Search products or scan a barcode</label><input id="barcode-search" type="search" name="q" value="{{ query }}" autocomplete="off" placeholder="Scan barcode, type SKU or search by name" autofocus><button class="button button-primary" type="submit">Find product</button></form>
+      <p class="pos-helper">Most USB barcode scanners type the code and press Enter automatically.</p>
+      <div class="pos-products">{% for row in rows %}
+        <article class="pos-product"><div class="pos-product-badge">▦</div><div class="pos-product-main"><strong>{{ row.product.name }}</strong><span>{{ row.product.sku }} · {{ row.product.category.name }}</span><span class="pos-small">On hand: {{ row.available|floatformat:-3 }} {{ row.product.get_unit_display }}</span></div>
+          <div class="pos-product-action"><strong>KES {{ row.product.retail_price|floatformat:2 }}</strong>{% if mode == 'WHOLESALE' %}<span class="pos-small">Wholesale: KES {{ row.product.wholesale_price|floatformat:2 }} · Min {{ row.product.wholesale_min_qty }}</span>{% endif %}
+          {% if row.saleable %}<form action="{% url 'pos:add_item' %}" method="post" class="pos-add-form">{% csrf_token %}<input type="hidden" name="product_id" value="{{ row.product.pk }}"><label class="sr-only" for="add-{{ row.product.pk }}">Quantity for {{ row.product.name }}</label><input id="add-{{ row.product.pk }}" name="quantity" type="number" min="0.001" step="{% if row.product.unit == 'KG' or row.product.unit == 'LITRE' %}0.001{% else %}1{% endif %}" value="1" required><button type="submit" class="pos-add-button">+ Add</button></form>
+          {% else %}<span class="pos-unavailable">{% if row.available <= 0 %}No stock{% else %}Price pending{% endif %}</span>{% endif %}</div>
+        </article>
+      {% empty %}<div class="pos-empty"><strong>No products found</strong><p>Try another product name or SKU. Only active catalogue products are shown.</p></div>{% endfor %}</div>
+      {% if page and page.has_other_pages %}<div class="pos-pagination">{% if page.has_previous %}<a href="?q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">← Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">Next →</a>{% endif %}</div>{% endif %}
+    </section>
+    <aside class="pos-panel pos-cart-panel"><div class="pos-panel-heading"><h2>Current cart</h2><span class="pos-tag">{{ cart_count }} product{{ cart_count|pluralize }}</span></div>
+      {% if cart_errors %}<div class="pos-alert pos-alert-error"><strong>Resolve before checkout</strong><ul>{% for error in cart_errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+      <div class="pos-cart-list">{% for row in cart_rows %}<article class="pos-cart-item"><div class="pos-cart-item-main"><strong>{{ row.product.name }}</strong><span>{{ row.product.sku }} · KES {{ row.price|floatformat:2 }} each</span></div><strong class="pos-cart-line-total">KES {{ row.total|floatformat:2 }}</strong><form method="post" action="{% url 'pos:update_item' %}" class="pos-cart-adjust">{% csrf_token %}<input type="hidden" name="product_id" value="{{ row.product.pk }}"><label class="sr-only" for="qty-{{ row.product.pk }}">Quantity</label><input id="qty-{{ row.product.pk }}" name="quantity" type="number" min="0.001" step="{% if row.product.unit == 'KG' or row.product.unit == 'LITRE' %}0.001{% else %}1{% endif %}" value="{{ row.quantity }}"><button type="submit" name="action" value="update">Update</button><button type="submit" name="action" value="remove" class="pos-remove">Remove</button></form></article>
+      {% empty %}<div class="pos-empty"><strong>Cart is empty</strong><p>Search for products and add them to begin a sale.</p></div>{% endfor %}</div>
+      <div class="pos-totals"><div><span>Included tax (estimated from item rates)</span><strong>KES {{ included_tax|floatformat:2 }}</strong></div><div class="pos-grand-total"><span>Total (tax inclusive)</span><strong>KES {{ subtotal|floatformat:2 }}</strong></div></div>
+      <form method="post" action="{% url 'pos:checkout' %}" class="pos-checkout" id="pos-checkout-form">{% csrf_token %}<input type="hidden" name="checkout_token" value="{{ token }}"><label for="pos-payment-method">Payment method</label><select name="payment_method" id="pos-payment-method"><option value="CASH">Cash</option><option value="MPESA">M-Pesa (manual reference)</option><option value="CARD">Card (manual reference)</option><option value="BANK">Bank transfer (manual reference)</option></select>
+        <div id="pos-cash-box"><label for="pos-cash-tendered">Cash received (KES)</label><input type="number" id="pos-cash-tendered" name="cash_tendered" min="0" step="0.01" placeholder="Amount received"></div>
+        <div id="pos-ref-box" hidden><label for="pos-reference">Payment reference</label><input id="pos-reference" name="payment_reference" maxlength="100" placeholder="Provider transaction / receipt code"><p class="pos-helper">Manual reference only. An authorized manager must independently verify receipt of funds.</p></div>
+        <button type="submit" class="button button-primary pos-checkout-button" {% if not cart_rows or cart_errors %}disabled{% endif %}>Complete sale → receipt</button>
+      </form><p class="pos-disclaimer">Prices and included tax are drawn from your product catalogue. Set real prices and receive actual stock before business use. POS receipts are not fiscal/eTIMS invoices.</p>
+    </aside>
+  </div>
+  {% endif %}
+</div></div>
+<script src="{% static 'pos/js/pos.js' %}" defer></script>
+{% endblock %}

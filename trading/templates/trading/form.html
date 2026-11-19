@@ -1,0 +1,11 @@
+{% extends 'trading/layout.html' %}
+{% block title %}{{ heading }} | SmartMart ERP{% endblock %}
+{% block trading_content %}
+<div class="tr-panel tr-form-panel"><div class="tr-eyebrow">SMARTMART ERP · STAGE 5</div><h1>{{ heading }}</h1><p class="tr-muted">{{ subheading }}</p>
+ <form method="post" class="tr-form">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="tr-error">{{ form.non_field_errors }}</div>{% endif %}
+  {% for field in form %}<div class="tr-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="tr-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+  <div class="tr-actions"><button type="submit" class="button button-primary">Save and continue</button><a href="{% url 'trading:home' %}" class="button button-outline">Cancel</a></div>
+ </form>
+</div>
+{% endblock %}

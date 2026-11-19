@@ -1,0 +1,11 @@
+{% extends 'workforce/layout.html' %}
+{% block hr_title %}Leave Approvals{% endblock %}
+{% block hr_heading %}Leave Approvals{% endblock %}
+{% block hr_subheading %}Review employee leave requests for your authorized branch.{% endblock %}
+{% block hr_content %}
+<div class="hr-actions"><a class="hr-button hr-button-outline" href="?status=PENDING">Pending</a><a class="hr-button hr-button-outline" href="?status=APPROVED">Approved</a><a class="hr-button hr-button-outline" href="?status=REJECTED">Rejected</a><a class="hr-button hr-button-outline" href="?status=ALL">All</a></div>
+<div class="hr-card hr-section hr-scroll"><table class="hr-table"><thead><tr><th>Employee</th><th>Branch</th><th>Leave and dates</th><th>Reason</th><th>Status / action</th></tr></thead><tbody>
+{% for item in requests %}<tr><td><strong>{{ item.profile.user.get_full_name|default:item.profile.user.username }}</strong></td><td>{{ item.profile.branch.name }}</td><td>{{ item.get_leave_type_display }}<br>{{ item.starts_on }} – {{ item.ends_on }}</td><td>{{ item.reason|default:'—' }}</td><td>{{ item.get_status_display }}{% if item.can_review %}<form class="hr-review" method="post" action="{% url 'workforce:review_leave' item.pk %}">{% csrf_token %}<input type="text" name="note" placeholder="Reason (required if rejecting)" maxlength="1200"><div class="hr-actions"><button class="hr-button hr-button-sm" name="action" value="approve">Approve</button><button class="hr-button hr-button-sm hr-button-red" name="action" value="reject">Reject</button></div></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="5">No requests match this filter.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

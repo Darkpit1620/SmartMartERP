@@ -1,0 +1,8 @@
+{% extends 'workforce/layout.html' %}
+{% block hr_title %}Request Leave{% endblock %}
+{% block hr_heading %}Request Time Off{% endblock %}
+{% block hr_subheading %}Your manager or head-office administrator will review your request.{% endblock %}
+{% block hr_content %}<div class="hr-card hr-form-card"><form method="post">{% csrf_token %}{{ form.non_field_errors }}
+{% for field in form %}<div class="hr-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="hr-field-error">{{ error }}</p>{% endfor %}</div>{% endfor %}
+<button class="hr-button" type="submit">Submit leave request</button> <a class="hr-button hr-button-outline" href="{% url 'workforce:my_leaves' %}">Cancel</a>
+</form></div>{% endblock %}

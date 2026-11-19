@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{{ heading }} | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'staff_activation/css/employee.css' %}">
+<div class="sm-employee-area"><div class="wrap">
+  <div class="sm-breadcrumb"><a href="{% url 'core:admin_portal' %}">Administrator</a> / <a href="{% url 'staff_activation:home' %}">Employee activation</a> / {{ heading }}</div>
+  <div class="sm-form-shell"><div class="sm-employee-hero"><div><span class="sm-kicker">SMARTMART TEAM SETUP</span><h1>{{ heading }}</h1><p>{{ summary }}</p></div></div>
+  <form method="post" class="sm-panel sm-entry-form" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="sm-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="sm-form-grid">{% for field in form %}<div class="sm-field {% if field.field.widget.input_type == 'password' %}sm-secret{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span>*</span>{% endif %}</label>
+      <div class="sm-control">{{ field }}{% if field.field.widget.input_type == 'password' %}<button class="sm-reveal" type="button" data-password-target="{{ field.id_for_label }}" aria-label="Show password" aria-pressed="false">Show</button>{% endif %}</div>
+      {% if field.help_text %}<small class="sm-muted">{{ field.help_text }}</small>{% endif %}
+      {% for error in field.errors %}<small class="sm-error">{{ error }}</small>{% endfor %}
+    </div>{% endfor %}</div>
+    {% if password_controls %}<p class="sm-muted">Passwords must meet your Django password policy. The two password entries must match. New employees require administrator approval before login.</p>{% endif %}
+    <div class="sm-toolbar"><button type="submit" class="button button-primary">Save</button><a class="button button-outline" href="{% url 'staff_activation:home' %}">Cancel</a></div>
+  </form></div>
+</div></div>
+<script>
+document.querySelectorAll('[data-password-target]').forEach(button => {
+  button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.passwordTarget);
+    if (!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    button.textContent = show ? 'Hide' : 'Show';
+    button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    button.setAttribute('aria-pressed', String(show));
+  });
+});
+</script>
+{% endblock %}

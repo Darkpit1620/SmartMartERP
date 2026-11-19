@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Bulk Product Pricing | SmartMart ERP{% endblock %}
+{% block content %}
+<div class="wrap price-shell">
+  <div class="price-heading">
+    <p class="price-eyebrow">HEAD OFFICE · PRODUCTS & PRICING</p>
+    <h1>Bulk product pricing</h1>
+    <p>Update thousands of product prices in one CSV. Stock levels and POS sales remain unchanged.</p>
+  </div>
+  <section class="price-stats" aria-label="Catalogue pricing summary">
+    <div><strong>{{ product_count }}</strong><span>Products in catalogue</span></div>
+    <div><strong>{{ priced_retail }}</strong><span>Retail prices configured</span></div>
+    <div><strong>{{ unpriced_retail }}</strong><span>Retail prices pending</span></div>
+    <div><strong>{{ unpriced_wholesale }}</strong><span>Wholesale prices pending</span></div>
+  </section>
+  <div class="price-grid">
+    <section class="price-panel">
+      <p class="price-steps">STEP 1</p>
+      <h2>Download the full price sheet</h2>
+      <p>Export every product with its SKU and existing price values. Open the file in Excel or another CSV editor.</p>
+      <a href="{% url 'pricing_portal:export' %}" class="button button-primary">Download all products (CSV) ↓</a>
+      <div class="price-note">Keep <strong>sku</strong> unchanged. Enter verified prices in KES without currency symbols or commas (example: <code>149.50</code>). Leave unknown prices blank.</div>
+    </section>
+    <section class="price-panel">
+      <p class="price-steps">STEP 2</p>
+      <h2>Upload your completed CSV</h2>
+      <p>Preview first. Then choose the file again and click <strong>Import verified prices</strong> to save your updates.</p>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="prices-csv">Completed CSV price sheet</label>
+        <input id="prices-csv" type="file" name="csv_file" accept=".csv,text/csv" required>
+        <div class="price-actions">
+          <button class="button button-outline" type="submit" name="action" value="preview">Check / Preview</button>
+          <button class="button button-primary" type="submit" name="action" value="import" onclick="return confirm('Apply verified prices to SmartMart ERP? Existing stock and sales will not change.');">Import verified prices</button>
+        </div>
+      </form>
+    </section>
+  </div>
+  {% if error %}<section role="alert" class="price-alert price-alert-error"><strong>No changes made.</strong> {{ error }}</section>{% endif %}
+  {% if preview %}
+    {% if imported_count is not None %}
+      <section role="status" class="price-alert price-alert-success"><strong>Prices updated:</strong> {{ imported_count }} products. Inventory balances and existing sales were not changed.</section>
+    {% else %}
+      <section role="status" class="price-alert price-alert-success"><strong>Preview passed:</strong> {{ preview.seen }} rows with entered values; {{ preview.changed }} products would change ({{ preview.cells }} values). No prices saved yet.</section>
+    {% endif %}
+    {% if preview.examples %}
+      <section class="price-panel price-preview">
+        <h2>Changes checked</h2>
+        <table><thead><tr><th>SKU</th><th>Product</th><th>Fields changing</th></tr></thead><tbody>
+        {% for sku, name, fields in preview.examples %}<tr><td>{{ sku }}</td><td>{{ name }}</td><td>{{ fields }}</td></tr>{% endfor %}
+        </tbody></table><p>Showing up to 10 changed products, not the full CSV.</p>
+      </section>
+    {% endif %}
+  {% endif %}
+  <section class="price-panel price-rules">
+    <h2>Important pricing rules</h2>
+    <ul>
+      <li>Only head-office administrators can import company-wide prices.</li>
+      <li>Retail and wholesale prices must be positive values; blank means <strong>do not modify</strong>.</li>
+      <li>Cost prices and tax rates must come from verified business records and approved tax treatment.</li>
+      <li>Do not change the SKU column. Unknown or repeated SKUs cause the entire import to be rejected.</li>
+      <li>The importer does not create products, receive stock, adjust stock, or rewrite past receipts.</li>
+      <li>Keep a private backup before large imports. The import is atomic: an invalid CSV will not partially update prices.</li>
+    </ul>
+    <a href="{% url 'core:admin_portal' %}">← Back to administrator workspace</a>
+  </section>
+</div>
+{% endblock %}

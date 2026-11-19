@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block title %}SmartMart ERP | Run every store with confidence{% endblock %}
+{% block content %}
+<section class="home-hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="live-dot"></span> THE SMARTER WAY TO RUN RETAIL</div>
+      <h1>One platform.<br><span class="headline-accent">Every store.</span><br>In control.</h1>
+      <p class="hero-description">A modern home for your supermarket team. Connect sales, warehouse operations, staff, and every branch as your business grows.</p>
+      <div class="hero-actions">
+        <a href="{% url 'core:login' %}" class="button button-primary">Enter staff portal <span aria-hidden="true">↗</span></a>
+        <a href="#workspaces" class="button button-soft">Explore workspaces <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="feature-pills"><span>✓ Role-based access</span><span>✓ Branch-ready</span><span>✓ Built for wholesale & retail</span></div>
+    </div>
+    <div class="hero-art" aria-label="Stylized preview of the future SmartMart ERP dashboard" role="img">
+      <div class="floating-bubble bubble-top">✦ Built for growing teams</div>
+      <div class="mock-panel">
+        <div class="mock-top"><span class="mock-kicker">SMARTMART WORKSPACE</span><span class="mock-circle">↗</span></div>
+        <h2>Everything in sync.</h2>
+        <p>Business overview · Preview</p>
+        <div class="mock-graph" aria-hidden="true"><i style="height:42%"></i><i style="height:62%"></i><i style="height:54%"></i><i style="height:78%"></i><i style="height:67%"></i><i style="height:91%"></i></div>
+        <div class="mock-row"><span class="mock-row-icon">◈</span><span><strong>Point of sale</strong><small>Fast checkout workflows</small></span><span>↗</span></div>
+        <div class="mock-row"><span class="mock-row-icon mint">▣</span><span><strong>Inventory</strong><small>Visibility across branches</small></span><span>↗</span></div>
+      </div>
+      <div class="floating-bubble bubble-bottom">● Secure team access</div>
+    </div>
+  </div>
+</section>
+<section class="workspaces-section wrap" id="workspaces">
+  <div class="section-eyebrow">YOUR TEAM. ONE PLATFORM.</div>
+  <h2 class="section-heading">A workspace for every role.</h2>
+  <p class="section-lead">Choose your role to understand where you will work. The administrator approves employee access; cashiers and warehouse teams see only what they need.</p>
+  <div class="workspace-grid">
+    <a class="workspace-card" href="{% url 'core:login' %}"><span class="card-icon purple">◆</span><h3>Administrator</h3><p>Control branches, accounts, approvals, and system settings.</p><span class="card-action">Access management →</span></a>
+    <a class="workspace-card" href="{% url 'core:login' %}"><span class="card-icon green">▤</span><h3>Cashier</h3><p>A focused checkout area for daily sales and customer service.</p><span class="card-action">Enter cashier portal →</span></a>
+    <a class="workspace-card" href="{% url 'core:login' %}"><span class="card-icon orange">▧</span><h3>Warehouse</h3><p>Receive, count, and transfer goods across your supermarket.</p><span class="card-action">Enter warehouse portal →</span></a>
+    <a class="workspace-card" href="{% url 'core:login' %}"><span class="card-icon blue">◎</span><h3>Manager & Staff</h3><p>Keep each branch aligned with its assigned daily operations.</p><span class="card-action">Enter staff portal →</span></a>
+  </div>
+</section>
+<section class="closing-banner wrap"><div><span class="section-eyebrow">BUILT TO SCALE</span><h2>From your first checkout<br>to your next branch.</h2><p>Start with a secure team workspace, then grow into POS, inventory, wholesale, and reporting.</p></div><a href="{% url 'core:login' %}" class="button button-primary">Sign in to SmartMart <span aria-hidden="true">↗</span></a></section>
+{% endblock %}

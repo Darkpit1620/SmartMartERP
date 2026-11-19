@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% block title %}Administrator | SmartMart ERP
+<!-- SMARTMART_TRADE_ADMIN -->
+<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">▣</div><h3>Suppliers &amp; Purchasing</h3><p>Order products, receive deliveries, and audit supplier receipts.</p><a class="dashboard-card-link" href="{% url 'trading:home' %}">Open purchasing →</a></section><section class="dashboard-card"><div class="card-icon orange">▦</div><h3>Wholesale Orders</h3><p>Manage bulk customer orders and fulfill them with official POS receipts.</p><a class="dashboard-card-link" href="{% url 'trading:home' %}">Open wholesale →</a></section></div>
+
+<!-- SMARTMART_TRANSFER_ADMIN -->
+<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">⇄</div><h3>Branch Stock Transfers</h3><p>Dispatch, receive, and audit stock movements across supermarket branches.</p><a class="dashboard-card-link" href="{% url 'transfers:list' %}">Manage transfers →</a></section></div>
+{% endblock %}
+{% block content %}
+<div class="dashboard-area"><div class="wrap"><div class="breadcrumbs"><a href="{% url 'core:home' %}">SmartMart ERP</a><span>›</span><span>Administrator Workspace</span></div>
+<section class="dashboard-hero"><div><div class="eyebrow">HEAD OFFICE ADMINISTRATION</div><h1>Welcome, {{ user.first_name|default:user.username }}.</h1><p>Manage employee access and branches in one secure place.</p><span class="dashboard-tag">Verified superuser session</span></div><span class="hero-decoration" aria-hidden="true">✦</span></section>
+<div class="dashboard-heading"><div><div class="section-eyebrow">GET SMARTMART READY</div><h2>Administrator Workspace</h2></div><span class="status-label"><span class="live-dot"></span> Admin access</span></div>
+<div class="dashboard-cards"><section class="dashboard-card"><div class="card-icon green">▤</div><h3>Employee Accounts</h3><p>Create users, assign their roles, and approve store access.</p><a class="dashboard-card-link" href="{% url 'admin:auth_user_changelist' %}">Manage employees →</a></section><section class="dashboard-card"><div class="card-icon orange">▦</div><h3>Branches</h3><p>Register your first store or add another supermarket location.</p><a class="dashboard-card-link" href="{% url 'admin:core_branch_changelist' %}">Manage branches →</a></section><section class="dashboard-card"><div class="card-icon blue">◎</div><h3>Staff Approvals</h3><p>Approve or suspend employee accounts based on their assignments.</p><a class="dashboard-card-link" href="{% url 'admin:core_staffprofile_changelist' %}">Review profiles →</a></section></div>
+<!-- SMARTMART_STAGE3_ADMIN -->
+<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">▦</div><h3>Product Catalogue</h3><p>Create products, barcodes, categories, retail and wholesale prices.</p><a class="dashboard-card-link" href="{% url 'inventory:product_list' %}">Manage products →</a></section><section class="dashboard-card"><div class="card-icon blue">▥</div><h3>Branch Inventory</h3><p>Monitor stock by branch, receive deliveries and review low-stock items.</p><a class="dashboard-card-link" href="{% url 'inventory:stock_list' %}">View inventory →</a></section><section class="dashboard-card"><div class="card-icon orange">≡</div><h3>Stock Audit Trail</h3><p>See stock movement history and the employee who recorded it.</p><a class="dashboard-card-link" href="{% url 'inventory:movements' %}">View movements →</a></section></div>
+<!-- SMARTMART_BULK_ADMIN -->
+<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">▦</div><h3>Full Supermarket Catalogue</h3><p>Browse groceries, electronics, clothing, household products and 49 departments.</p><a class="dashboard-card-link" href="{% url 'smartmart_bulk:browse' %}">Browse all departments →</a></section></div>
+<!-- SMARTMART_POS_ADMIN -->
+<div class="dashboard-cards" style="margin-top:18px"><section class="dashboard-card"><div class="card-icon green">▣</div><h3>Cashier Point of Sale</h3><p>Sell products, issue printed receipts and review payments.</p><a class="dashboard-card-link" href="{% url 'pos:index' %}">Open POS →</a></section><section class="dashboard-card"><div class="card-icon blue">▤</div><h3>Sales and Receipts</h3><p>Review branch sales and outstanding payment verifications.</p><a class="dashboard-card-link" href="{% url 'pos:sales' %}">View sales →</a></section></div>
+<div class="profile-strip"><div><strong>Next milestone</strong><p>Stage 3 live: product catalogue, barcode inventory and branch stock. Stage 4: Checkout and POS.</p></div><a class="button button-dark" href="{% url 'admin:index' %}">Open Django Administration ↗</a></div>
+</div></div>
+
+<!-- SMARTMART_HR_ADMIN -->
+<div class="wrap" style="padding-top:24px;padding-bottom:14px"><div class="profile-strip"><div><strong>Employee Management &amp; HR</strong><p>Staff directory, branch attendance, leave approvals and employment records.</p></div><a class="button button-primary" href="{% url 'workforce:team' %}">Open HR Workspace →</a></div></div>
+
+<!-- SMARTMART_FINANCE_ADMIN -->
+<section class="wrap" style="padding-top:20px;padding-bottom:15px"><div class="profile-strip"><div><strong>Finance &amp; Business Reports</strong><p>Branch sales, verified payments, operating expenses and downloadable reports.</p></div><a class="button button-primary" href="{% url 'finance_ops:overview' %}">View financial reports →</a></div></section>
+
+<!-- SMARTMART_OPERATIONS_ADMIN -->
+<section class="wrap" style="padding:18px 0 34px"><div class="profile-strip"><div><strong>System Readiness &amp; Backups</strong><p>Check all branches, inventory, sales, unverified payments, and deployment settings.</p></div><a class="button button-primary" href="{% url 'operations:overview' %}">Run readiness review →</a></div></section>
+
+<!-- SMARTMART_PRICING_ADMIN -->
+<section class="wrap" style="padding:16px 0 30px"><div class="profile-strip"><div><strong>Bulk Product Pricing</strong><p>Export the full catalogue and import verified retail, wholesale, and cost prices.</p></div><a class="button button-primary" href="{% url 'pricing_portal:home' %}">Manage product prices →</a></div></section>
+
+<!-- SMARTMART_STAGE10B_EMPLOYEE_CARD -->
+<section class="wrap" style="padding:12px 0 36px"><div class="profile-strip"><div><strong>Employee & Branch Activation</strong><p>Create staff accounts and branches, review pending approvals and activate workspaces.</p></div><a class="button button-primary" href="{% url 'staff_activation:home' %}">Manage employees & branches →</a></div></section>
+
+<!-- SMARTMART_STAGE10C_TRANSACTION_CARD -->
+<section class="wrap" style="padding:12px 0 36px"><div class="profile-strip"><div><strong>Full Transaction Testing</strong><p>Verify retail and wholesale sales, goods receiving, branch transfers and finance.</p></div><a class="button button-primary" href="{% url 'transaction_checks:overview' %}">Open transaction checklist →</a></div></section>
+{% endblock %}

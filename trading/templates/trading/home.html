@@ -1,0 +1,26 @@
+{% extends 'trading/layout.html' %}
+{% block title %}Wholesale & Purchasing | SmartMart ERP{% endblock %}
+{% block trading_content %}
+<section class="tr-hero">
+ <div><div class="eyebrow">STAGE 5 · SUPPLY CHAIN &amp; TRADE</div><h1>Wholesale &amp; Purchasing</h1><p>Manage supplier orders, record verified deliveries, and fulfill wholesale customers through the existing POS.</p></div><span aria-hidden="true" class="tr-hero-icon">▣</span>
+</section>
+{% if branches %}
+ <form method="get" class="tr-branch"><label for="branch">Head office branch</label><select name="branch" id="branch" aria-label="Choose branch">{% for item in branches %}<option value="{{ item.id }}" {% if branch.id == item.id %}selected{% endif %}>{{ item.name }}</option>{% endfor %}</select><button class="button button-primary" type="submit">Switch branch</button></form>
+{% endif %}
+{% if branch %}
+ <div class="tr-kpis"><div class="tr-kpi"><strong>{{ branch.name }}</strong><small>Active operating branch</small></div><div class="tr-kpi"><strong>Purchasing</strong><small>Receive actual supplier goods</small></div><div class="tr-kpi"><strong>Wholesale</strong><small>Fulfill through POS receipts</small></div></div>
+ <div class="tr-grid">
+  <section class="tr-card"><div class="tr-card-icon">🚚</div><h2>Supplier purchasing</h2><p>Create purchase orders and receive deliveries into this branch. Each receipt creates a traceable inventory movement.</p>
+    {% if can_purchase %}<a class="button button-primary" href="{% url 'trading:supplier_new' %}">Add supplier</a> <a class="button button-outline" href="{% url 'trading:purchase_new' %}">New purchase order</a>{% endif %}
+  </section>
+  <section class="tr-card"><div class="tr-card-icon">🛒</div><h2>Wholesale customer orders</h2><p>Prepare a bulk order using verified product prices. Complete checkout once stock and payment are confirmed.</p>
+    {% if can_purchase %}<a class="button button-primary" href="{% url 'trading:customer_new' %}">Add customer</a> <a class="button button-outline" href="{% url 'trading:wholesale_new' %}">New wholesale order</a>{% else %}<p class="tr-note">Wholesale checkout requires branch-manager access.</p>{% endif %}
+  </section>
+ </div>
+ <div class="tr-grid">
+  <section class="tr-panel"><h2>Recent purchase orders</h2><div class="tr-scroll"><table class="tr-table"><thead><tr><th>Purchase order</th><th>Supplier</th><th>Status</th></tr></thead><tbody>{% for po in purchase_orders %}<tr><td><a href="{% url 'trading:purchase_detail' po.pk %}">{{ po.reference }}</a></td><td>{{ po.supplier.name }}</td><td><span class="tr-status">{{ po.get_status_display }}</span></td></tr>{% empty %}<tr><td colspan="3" class="tr-muted">No purchase orders yet.</td></tr>{% endfor %}</tbody></table></div></section>
+  <section class="tr-panel"><h2>Recent wholesale orders</h2><div class="tr-scroll"><table class="tr-table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th></tr></thead><tbody>{% for wo in wholesale_orders %}<tr><td>{% if can_purchase %}<a href="{% url 'trading:wholesale_detail' wo.pk %}">{{ wo.reference }}</a>{% else %}{{ wo.reference }}{% endif %}</td><td>{{ wo.customer }}</td><td><span class="tr-status">{{ wo.get_status_display }}</span></td></tr>{% empty %}<tr><td colspan="3" class="tr-muted">No wholesale orders yet.</td></tr>{% endfor %}</tbody></table></div></section>
+ </div>
+{% else %}<div class="tr-panel"><h2>No active branch</h2><p>Create a branch in Django Admin before recording purchase or wholesale orders.</p></div>{% endif %}
+<div class="tr-tip"><strong>Stock rules</strong> · Creating a purchase order does not add stock. Receiving an actual delivery does. Creating a wholesale order does not reserve or remove stock. Completing its POS sale does.</div>
+{% endblock %}

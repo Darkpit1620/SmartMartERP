@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="dashboard-area trading-area">
+ <div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><a href="{% url 'trading:home' %}">Wholesale &amp; Purchasing</a></div>
+  {% if messages %}<div class="tr-flashes" role="status" aria-live="polite">{% for message in messages %}<p class="tr-message">{{ message }}</p>{% endfor %}</div>{% endif %}
+  {% block trading_content %}{% endblock %}
+ </div>
+</div>
+{% endblock %}

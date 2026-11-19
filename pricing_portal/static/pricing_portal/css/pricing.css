@@ -1,0 +1,21 @@
+.price-shell{padding:32px 0 70px;max-width:1160px}
+.price-heading{margin:0 0 22px}.price-eyebrow,.price-steps{color:#139a7a;font-size:.76rem;font-weight:800;letter-spacing:.12em}
+.price-heading h1{font-size:clamp(1.9rem,3.6vw,3.1rem);line-height:1.1;margin:7px 0 12px;color:#17362b}
+.price-heading p,.price-panel p,.price-rules li{color:#54665f;line-height:1.6}
+.price-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0}
+.price-stats>div{background:#fff;border:1px solid #e4eee8;border-radius:15px;padding:20px;box-shadow:0 4px 20px rgba(24,69,42,.04)}
+.price-stats strong{font-size:1.8rem;color:#155a43;display:block;font-variant-numeric:tabular-nums}
+.price-stats span{color:#61716b;font-size:.82rem}
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.price-panel{background:#fff;border:1px solid #dfece4;border-radius:17px;padding:25px;margin-top:18px;box-shadow:0 4px 24px rgba(24,69,42,.05)}
+.price-panel h2{font-size:1.22rem;margin:5px 0 10px;color:#18392e}
+.price-panel label{display:block;font-weight:700;margin:10px 0 8px}
+.price-panel input[type=file]{max-width:100%;display:block;background:#f7faf8;padding:14px;border:1px solid #cad9d0;border-radius:9px;width:100%;box-sizing:border-box}
+.price-panel code{background:#edf6ef;padding:2px 5px;border-radius:4px}
+.price-note{font-size:.88rem;padding:15px;border-left:3px solid #11aa7e;background:#f0faf6;margin-top:20px;border-radius:0 8px 8px 0;color:#375a4b}
+.price-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.price-alert{padding:18px 20px;border-radius:10px;margin-top:19px}.price-alert-error{background:#fff0ee;border:1px solid #ecb6b3;color:#943a31}.price-alert-success{background:#eaf9f0;border:1px solid #b3e0c7;color:#1f6545}
+.price-preview{overflow-x:auto}.price-preview table{width:100%;border-collapse:collapse}.price-preview th,.price-preview td{padding:12px 10px;border-bottom:1px solid #e5ece7;text-align:left;min-width:100px}.price-preview th{font-size:.8rem;color:#526e5f}
+.price-rules ul{padding-left:22px}.price-rules li{margin-bottom:8px}.price-rules a{font-weight:700;color:#13835d}
+@media(max-width:800px){.price-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.price-grid{grid-template-columns:1fr}}
+@media(max-width:420px){.price-stats{grid-template-columns:1fr 1fr}.price-panel{padding:17px}.price-stats>div{padding:13px}}

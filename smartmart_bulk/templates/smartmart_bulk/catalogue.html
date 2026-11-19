@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+{% block title %}Departments & Products | SmartMart ERP{% endblock %}
+{% block content %}
+<div class="sm-catalogue">
+  <div class="wrap">
+    <nav class="sm-crumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span>Shop departments</nav>
+    <section class="sm-hero">
+      <div>
+        <span class="sm-eyebrow">SMARTMART WHOLESALE + RETAIL</span>
+        <h1>Every aisle. One catalogue.</h1>
+        <p>Browse the full product range, filter by department, and check your branch's recorded stock. Products listed here are not necessarily in stock.</p>
+      </div>
+      <div class="sm-hero-mark" aria-hidden="true">▦</div>
+    </section>
+    <div class="sm-stats">
+      <div class="sm-stat"><strong>{{ all_count }}</strong><span>Catalogue products</span></div>
+      <div class="sm-stat"><strong>{{ department_count }}</strong><span>Product departments</span></div>
+      <div class="sm-stat"><strong>{{ available_in_branch }}</strong><span>Items with positive stock{% if branch %} · {{ branch.name }}{% endif %}</span></div>
+    </div>
+    <section class="sm-panel" aria-labelledby="sm-departments-title">
+      <div class="sm-heading"><div><span class="sm-eyebrow dark">SHOP BY CATEGORY</span><h2 id="sm-departments-title">Popular departments</h2></div><span>{{ department_count }} total departments</span></div>
+      <div class="sm-dept-pills">
+        {% for dept in popular_departments %}
+        <a class="sm-dept-pill {% if selected_category == dept.pk|stringformat:'s' %}chosen{% endif %}"
+           href="?category={{ dept.pk }}&amp;q={{ query|urlencode }}&amp;{% if branch %}branch={{ branch.pk }}&amp;{% endif %}{% if in_stock_only %}stock=yes{% endif %}">
+          {{ dept.name }} <span>{{ dept.product_count }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="sm-panel" aria-labelledby="sm-products-title">
+      <div class="sm-heading"><div><span class="sm-eyebrow dark">PRODUCT DISCOVERY</span><h2 id="sm-products-title">Browse products</h2></div><span>{{ page.paginator.count }} matching</span></div>
+      <form method="get" class="sm-filter-form" role="search">
+        <label class="sm-filter"><span>Search product or SKU</span><input type="search" name="q" value="{{ query }}" placeholder="Try rice, laptop, refrigerator, maize flour…" /></label>
+        <label class="sm-filter"><span>Department</span><select name="category"><option value="">All {{ department_count }} departments</option>
+        {% for dept in departments %}<option value="{{ dept.pk }}" {% if selected_category == dept.pk|stringformat:'s' %}selected{% endif %}>{{ dept.name }} ({{ dept.product_count }})</option>{% endfor %}</select></label>
+        {% if branches %}
+        <label class="sm-filter"><span>Branch stock</span><select name="branch">{% for b in branches %}<option value="{{ b.pk }}" {% if branch.pk == b.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></label>
+        {% elif branch %}<div class="sm-static-branch"><span>Branch</span><strong>{{ branch.name }}</strong></div>{% endif %}
+        <label class="sm-stock-filter"><input type="checkbox" name="stock" value="yes" {% if in_stock_only %}checked{% endif %}><span>In-stock items only</span></label>
+        <button type="submit" class="sm-search-btn">Apply filters</button>
+        <a class="sm-reset" href="{% url 'smartmart_bulk:browse' %}">Reset</a>
+      </form>
+      <div class="sm-notice"><span aria-hidden="true">ℹ</span><div><strong>Catalogue vs. real availability:</strong> All imported sample products start with no stock or verified prices. A product shows as <em>In stock</em> only after an authorized warehouse receipt is recorded at the selected branch.</div></div>
+      <div class="sm-grid">
+        {% for card in cards %}
+        <article class="sm-product-card">
+          <div class="sm-product-icon" aria-hidden="true">{{ card.icon }}</div>
+          <div class="sm-product-main">
+            <div class="sm-product-category">{{ card.product.category.name }}</div>
+            <h3><a href="{% url 'inventory:product_detail' card.product.pk %}">{{ card.product.name }}</a></h3>
+            <span class="sm-sku">SKU · {{ card.product.sku }}</span>
+          </div>
+          <div class="sm-product-meta">
+            <div><small>Retail</small><strong>{% if card.product.retail_price > 0 %}KSh {{ card.product.retail_price|floatformat:2 }}{% else %}Price pending{% endif %}</strong></div>
+            <div><small>Wholesale</small><strong>{% if card.product.wholesale_price > 0 %}KSh {{ card.product.wholesale_price|floatformat:2 }}{% else %}Price pending{% endif %}</strong></div>
+          </div>
+          <div class="sm-product-footer">
+            {% if branch %}
+              {% if card.quantity > 0 %}<span class="sm-stock-badge available">● In stock: {{ card.quantity|floatformat:-3 }}</span>
+              {% else %}<span class="sm-stock-badge unavailable">○ Not stocked</span>{% endif %}
+            {% else %}<span class="sm-stock-badge unavailable">Branch not selected</span>{% endif %}
+            <a href="{% url 'inventory:product_detail' card.product.pk %}" aria-label="Details for {{ card.product.name }}">Details →</a>
+          </div>
+        </article>
+        {% empty %}
+        <div class="sm-empty"><strong>No matching products found</strong><p>Try another department, SKU or keyword. If you selected “In-stock items only,” first record real stock receipts.</p><a href="{% url 'smartmart_bulk:browse' %}">Show full catalogue →</a></div>
+        {% endfor %}
+      </div>
+      {% if page.has_other_pages %}
+      <nav class="sm-pages" aria-label="Product pages">
+        {% if page.has_previous %}<a href="?q={{ query|urlencode }}&amp;category={{ selected_category }}&amp;branch={{ branch_id }}&amp;{% if in_stock_only %}stock=yes&amp;{% endif %}page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+        <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a href="?q={{ query|urlencode }}&amp;category={{ selected_category }}&amp;branch={{ branch_id }}&amp;{% if in_stock_only %}stock=yes&amp;{% endif %}page={{ page.next_page_number }}">Next →</a>{% endif %}
+      </nav>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

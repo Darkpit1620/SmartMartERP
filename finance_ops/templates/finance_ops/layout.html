@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{% block finance_title %}Finance & Reports{% endblock %} | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'finance_ops/css/finance.css' %}">
+<section class="sf-screen"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><a href="{% url 'finance_ops:overview' %}">Finance &amp; Reports</a></div>
+  <header class="sf-hero">
+    <div><p class="sf-eyebrow">SMARTMART · BUSINESS OPERATIONS</p><h1>{% block finance_heading %}Finance &amp; Reports{% endblock %}</h1><p>{% block finance_subheading %}Real sales, branch totals and controlled operating expenses.{% endblock %}</p></div><div class="sf-hero-icon" aria-hidden="true">▤</div>
+  </header>
+  <nav class="sf-nav" aria-label="Finance navigation">
+    <a href="{% url 'finance_ops:overview' %}">Sales reports</a>
+    <a href="{% url 'finance_ops:expenses' %}">Operating expenses</a>
+    <a href="{% url 'finance_ops:new_expense' %}">Record expense</a>
+    <a href="{% url 'pos:sales' %}">POS receipts</a>
+  </nav>
+  {% if messages %}{% for message in messages %}<div class="sf-message {% if message.tags == 'error' %}sf-error{% endif %}">{{ message }}</div>{% endfor %}{% endif %}
+  {% block finance_content %}{% endblock %}
+</div></section>
+{% endblock %}

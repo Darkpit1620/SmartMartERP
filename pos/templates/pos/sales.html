@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Sales History | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'pos/css/pos.css' %}">
+<div class="pos-shell"><div class="wrap"><div class="breadcrumbs"><a href="{% url 'pos:index' %}">POS</a><span>›</span><span>Sales &amp; receipts</span></div>
+<div class="pos-heading"><div><div class="section-eyebrow">POINT OF SALE RECORDS</div><h1>Sales &amp; receipts</h1><p>Cashiers see their own receipts. Managers see their branch; administrators see all branches.</p></div><a class="button button-primary" href="{% url 'pos:index' %}">New sale ↗</a></div>
+<section class="pos-panel pos-history"><div class="pos-table-scroll"><table><thead><tr><th>Receipt</th><th>Date</th><th>Branch</th><th>Cashier</th><th>Type</th><th>Payment</th><th>Amount</th><th></th></tr></thead><tbody>{% for sale in page %}<tr><td><strong>{{ sale.receipt_number }}</strong></td><td>{{ sale.created_at|date:'d M Y H:i' }}</td><td>{{ sale.branch.code }}</td><td>{{ sale.cashier.username }}</td><td>{{ sale.get_sale_type_display }}</td><td><span class="pos-tag">{{ sale.get_payment_status_display }}</span></td><td><strong>KES {{ sale.subtotal|floatformat:2 }}</strong></td><td><a href="{% url 'pos:receipt' sale.pk %}">Open →</a></td></tr>{% empty %}<tr><td colspan="8">No sales found for your account yet.</td></tr>{% endfor %}</tbody></table></div>
+{% if page.has_other_pages %}<div class="pos-pagination">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">← Previous</a>{% endif %}<span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?page={{ page.next_page_number }}">Next →</a>{% endif %}</div>{% endif %}</section></div></div>
+{% endblock %}

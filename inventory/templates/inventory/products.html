@@ -1,0 +1,13 @@
+{% extends 'inventory/layout.html' %}
+{% block title %}Product Catalogue | SmartMart ERP{% endblock %}
+{% block inventory_content %}
+<section class="inventory-banner"><div><div class="eyebrow">SMARTMART PRODUCT HUB</div><h1>Product catalogue</h1><p>One catalogue for every branch. Scan barcodes, compare retail and wholesale prices.</p></div><div class="inventory-symbol">▦</div></section>
+<div class="inventory-toolbar"><form method="get" class="inventory-search" role="search"><label class="sr-only" for="product-search">Search name, SKU or barcode</label><input id="product-search" class="inventory-input" name="q" value="{{ query }}" placeholder="Search name, SKU or barcode" autofocus><button class="button button-primary" type="submit">Search</button></form>
+{% if can_manage %}<div class="inventory-actions"><a class="button button-soft" href="{% url 'inventory:category_create' %}">+ Category</a><a class="button button-primary" href="{% url 'inventory:product_create' %}">+ New product</a></div>{% endif %}</div>
+<div class="inventory-panel"><div class="inventory-panel-title"><h2>Available products</h2><span>{{ items.paginator.count }} product{{ items.paginator.count|pluralize }}</span></div>
+<div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>Product</th><th>SKU</th><th>Barcode</th><th>Retail (KSh)</th><th>Wholesale (KSh)</th><th>Min wholesale qty</th></tr></thead><tbody>
+{% for product in items %}<tr><td><a class="inventory-strong-link" href="{% url 'inventory:product_detail' product.pk %}">{{ product.name }}</a><small>{{ product.category.name }}{% if not product.is_active %} · Inactive{% endif %}</small></td><td>{{ product.sku }}</td><td>{{ product.barcode|default:'—' }}</td><td>{{ product.retail_price|floatformat:2 }}</td><td>{{ product.wholesale_price|floatformat:2 }}</td><td>{{ product.wholesale_min_qty }}</td></tr>
+{% empty %}<tr><td colspan="6" class="inventory-empty">No products found. Administrators can add the first product above.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% if items.has_other_pages %}<div class="inventory-pagination">{% if items.has_previous %}<a class="button button-soft" href="?q={{ query|urlencode }}&amp;page={{ items.previous_page_number }}">Previous</a>{% endif %}<span>Page {{ items.number }} of {{ items.paginator.num_pages }}</span>{% if items.has_next %}<a class="button button-soft" href="?q={{ query|urlencode }}&amp;page={{ items.next_page_number }}">Next</a>{% endif %}</div>{% endif %}
+{% endblock %}

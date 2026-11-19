@@ -1,0 +1,8 @@
+{% extends 'workforce/layout.html' %}
+{% block hr_title %}Team Attendance{% endblock %}
+{% block hr_heading %}Team Attendance{% endblock %}
+{% block hr_subheading %}Review attendance for employees in your authorized branch.{% endblock %}
+{% block hr_content %}
+<form method="get" class="hr-filter"><label for="workdate">Work date</label><input id="workdate" type="date" name="date" value="{{ selected_date }}"><button class="hr-button" type="submit">Filter</button></form>
+<div class="hr-card hr-section hr-scroll"><table class="hr-table"><thead><tr><th>Employee</th><th>Branch</th><th>Date</th><th>Check in</th><th>Check out</th></tr></thead><tbody>{% for item in entries %}<tr><td>{{ item.profile.user.get_full_name|default:item.profile.user.username }}</td><td>{{ item.profile.branch.name }}</td><td>{{ item.work_date }}</td><td>{{ item.checked_in_at|date:'H:i' }}</td><td>{{ item.checked_out_at|date:'H:i'|default:'—' }}</td></tr>{% empty %}<tr><td colspan="5">No attendance records for this date.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

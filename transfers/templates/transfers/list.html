@@ -1,0 +1,12 @@
+{% extends 'transfers/layout.html' %}
+{% block title %}Branch Stock Transfers | SmartMart ERP{% endblock %}
+{% block transfer_content %}
+<section class="transfer-hero"><div><span class="transfer-eyebrow">WAREHOUSE OPERATIONS</span><h1>Branch Stock Transfers</h1><p>Move stock safely between supermarket branches. Track draft orders, goods in transit, and receiving confirmations.</p></div><span class="transfer-hero-art" aria-hidden="true">⇄</span></section>
+<div class="transfer-stats"><div class="transfer-stat"><strong>{% if branch %}{{ branch.name }}{% else %}All branches{% endif %}</strong><span>Accessible location</span></div><div class="transfer-stat"><strong>{{ incoming }}</strong><span>Incoming / received transfers</span></div><div class="transfer-stat"><strong>Audited</strong><span>Every dispatch and receipt</span></div></div>
+<div class="transfer-panel">
+<div class="transfer-panel-head"><h2>Transfers</h2>{% if can_create %}<a class="button button-primary" href="{% url 'transfers:new' %}">+ New stock transfer</a>{% endif %}</div>
+<p class="transfer-hint">Goods remain <strong>in transit</strong> after dispatch and only count as destination inventory when receiving staff confirm arrival.</p>
+<form method="get" class="transfer-filter"><label for="status">Filter by status</label><select name="status" id="status" class="transfer-input"><option value="">All statuses</option>{% for value, label in status_choices %}<option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="button button-outline" type="submit">Filter</button></form>
+<div class="transfer-scroll"><table class="transfer-table"><thead><tr><th>Reference</th><th>From</th><th>To</th><th>Status</th><th>Created</th><th>Details</th></tr></thead><tbody>{% for order in orders %}<tr><td><strong>{{ order.reference }}</strong></td><td>{{ order.source_branch.name }}</td><td>{{ order.destination_branch.name }}</td><td><span class="transfer-badge">{{ order.get_status_display }}</span></td><td>{{ order.created_at|date:'d M Y, H:i' }}</td><td><a href="{% url 'transfers:detail' order.pk %}">Open transfer →</a></td></tr>{% empty %}<tr><td colspan="6">No branch transfers yet. {% if can_create %}Create your first transfer above.{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

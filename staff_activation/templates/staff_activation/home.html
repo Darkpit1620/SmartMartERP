@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Employee & Branch Activation | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'staff_activation/css/employee.css' %}">
+<div class="sm-employee-area">
+  <div class="wrap">
+    <div class="sm-breadcrumb"><a href="{% url 'core:admin_portal' %}">Administrator</a> / Employee & Branch Activation</div>
+    <div class="sm-employee-hero">
+      <div><span class="sm-kicker">HEAD OFFICE · PEOPLE & LOCATIONS</span><h1>Employee & Branch Activation</h1><p>Set up your branches, appoint cashiers and managers, and approve access to the right workspace.</p></div>
+      <div class="sm-toolbar"><a class="button button-soft" href="{% url 'staff_activation:create_branch' %}">+ Add Branch</a><a class="button button-primary" href="{% url 'staff_activation:create_employee' %}">+ Create Employee</a></div>
+    </div>
+    {% if messages %}<div class="sm-notices" role="status">{% for message in messages %}<p class="sm-notice">{{ message }}</p>{% endfor %}</div>{% endif %}
+    <div class="sm-metrics">
+      <div class="sm-metric"><strong>{{ employee_count }}</strong><span>Employee accounts</span></div>
+      <div class="sm-metric"><strong>{{ approved_count }}</strong><span>Approved employees</span></div>
+      <div class="sm-metric"><strong>{{ pending_count }}</strong><span>Awaiting approval</span></div>
+      <div class="sm-metric"><strong>{{ active_branches }} / {{ branch_count }}</strong><span>Active / total branches</span></div>
+    </div>
+    <section class="sm-panel">
+      <div class="sm-panel-heading"><div><h2>Employee directory</h2><p>Approval is required before an employee can sign in. Suspend access immediately when needed.</p></div><a href="{% url 'admin:core_staffprofile_changelist' %}" class="sm-link">Edit staff profiles in Admin →</a></div>
+      <form class="sm-filters" action="" method="get">
+        <label>Branch<select name="branch"><option value="">All branches</option>{% for branch in branches %}<option value="{{ branch.pk }}" {% if selected_branch == branch.pk|stringformat:'s' %}selected{% endif %}>{{ branch.name }}</option>{% endfor %}</select></label>
+        <label>Role<select name="role"><option value="">All roles</option>{% for code,name in role_options %}<option value="{{ code }}" {% if selected_role == code %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
+        <label>Approval<select name="status"><option value="">Any status</option><option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option><option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option></select></label>
+        <button class="button button-dark button-small" type="submit">Filter</button>
+      </form>
+      <div class="sm-table-overflow"><table class="sm-table"><thead><tr><th>Employee</th><th>Employee ID</th><th>Role</th><th>Branch</th><th>Access</th><th>Action</th></tr></thead><tbody>
+        {% for profile in profiles %}<tr><td><strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong><small>{{ profile.user.username }} · {{ profile.user.email }}</small></td><td>{{ profile.employee_id|default:'Not issued' }}</td><td>{{ profile.get_role_display }}</td><td>{{ profile.branch.name|default:'Not assigned' }}</td><td>{% if profile.is_approved %}<span class="sm-pill sm-pill-green">Approved</span>{% else %}<span class="sm-pill sm-pill-amber">Pending / suspended</span>{% endif %}</td><td>
+          {% if not profile.user.is_superuser and not profile.user.is_staff %}<form method="post" action="{% url 'staff_activation:review_employee' profile.pk %}">{% csrf_token %}{% if profile.is_approved %}<input type="hidden" name="action" value="suspend"><button class="sm-action sm-action-red" type="submit" onclick="return confirm('Suspend this employee’s access?')">Suspend</button>{% else %}<input type="hidden" name="action" value="approve"><button class="sm-action" type="submit" {% if not profile.branch_id or not profile.branch.active or not profile.user.is_active %}disabled title="Requires an active account and branch"{% endif %}>Approve</button>{% endif %}</form>{% else %}<span>Admin-managed</span>{% endif %}
+          </td></tr>{% empty %}<tr><td colspan="6" class="sm-empty">No employees match these filters. <a href="{% url 'staff_activation:create_employee' %}">Create your first employee</a>.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+    <section class="sm-panel"><div class="sm-panel-heading"><div><h2>Supermarket branches</h2><p>Every non-admin employee should belong to an active branch.</p></div></div><div class="sm-branches">{% for branch in branches %}<div class="sm-branch"><strong>{{ branch.name }}</strong><span>{{ branch.code }} · {{ branch.address|default:'Address not set' }}</span>{% if branch.active %}<em>Active</em>{% else %}<em class="sm-inactive">Inactive</em>{% endif %}</div>{% empty %}<p>No branches yet. Create the first branch before adding employees.</p>{% endfor %}</div></section>
+    <div class="sm-help">For staff records such as departments, attendance, and leave, use the existing <a href="{% url 'workforce:home' %}">HR & Attendance</a> workspace. Employee passwords must be shared securely; do not send them by ordinary email.</div>
+  </div>
+</div>
+{% endblock %}
