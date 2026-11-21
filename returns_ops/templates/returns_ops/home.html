@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% block title %}Returns &amp; Refunds | SmartMart ERP{% endblock %}
+{% block content %}
+<section class="wrap" style="padding:34px 16px 70px;max-width:1050px">
+  <p><a href="{% url 'core:dashboard' %}">← My workspace</a> · <a href="{% url 'pos:sales' %}">Sales receipts</a></p>
+  <h1>Returns &amp; refunds</h1>
+  <p>To create a return, open the original receipt from <a href="{% url 'pos:sales' %}">sales history</a> and select <strong>Request return</strong>.</p>
+  <p style="color:#526272">Every return requires manager review. A recorded refund is a manual confirmation, not an automatic payment.</p>
+  {% if messages %}{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}{% endif %}
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+    <thead><tr><th style="text-align:left;padding:12px">Return</th><th style="text-align:left;padding:12px">Original receipt</th><th style="text-align:left;padding:12px">Amount (KES)</th><th style="text-align:left;padding:12px">Review</th><th style="text-align:left;padding:12px">Refund</th></tr></thead>
+    <tbody>{% for r in page %}<tr style="border-top:1px solid #ddd"><td style="padding:12px"><a href="{% url 'returns_ops:detail' r.pk %}">#{{ r.pk }}</a></td><td style="padding:12px">{{ r.sale.receipt_number }} · {{ r.sale.branch.name }}</td><td style="padding:12px">{{ r.amount|floatformat:2 }}</td><td style="padding:12px">{{ r.get_status_display }}</td><td style="padding:12px">{% if r.status == 'APPROVED' %}{{ r.get_refund_status_display }}{% else %}—{% endif %}</td></tr>{% empty %}<tr><td colspan="5" style="padding:14px">No returns recorded for the receipts you are authorized to view.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">Previous</a>{% endif %}
+  <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Next</a>{% endif %}
+</section>
+{% endblock %}

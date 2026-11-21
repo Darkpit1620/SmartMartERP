@@ -23,4 +23,7 @@
  </div>
 {% else %}<div class="tr-panel"><h2>No active branch</h2><p>Create a branch in Django Admin before recording purchase or wholesale orders.</p></div>{% endif %}
 <div class="tr-tip"><strong>Stock rules</strong> · Creating a purchase order does not add stock. Receiving an actual delivery does. Creating a wholesale order does not reserve or remove stock. Completing its POS sale does.</div>
+
+<!-- SMARTMART_STAGE13I_TRADE -->
+{% if can_purchase %}<section class="tr-panel"><h2>Supplier Accounts</h2><p>Record supplier invoice numbers, reconcile outstanding amounts, and document actual payments without altering purchase receipts.</p><a class="button button-primary" href="{% url 'supplier_accounts:home' %}{% if branch %}?branch={{ branch.pk }}{% endif %}">Open supplier accounts →</a></section>{% endif %}
 {% endblock %}

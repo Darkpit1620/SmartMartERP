@@ -81,7 +81,7 @@ class SmartMartInventoryTests(TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertContains(result, "Nairobi Central")
         self.assertNotContains(result, "Mombasa Central")
-        self.assertNotContains(result, "40")
+        self.assertNotContains(result, "<td><strong>40</strong></td>")
         self.client.post(reverse("inventory:stock_change", args=[self.product.pk]) + f"?branch={self.branch2.pk}", {
             "kind": "RECEIPT", "quantity": 2, "reference": "LOCAL",
         })

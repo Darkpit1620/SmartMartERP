@@ -1,42 +1,54 @@
-SMARTMART ERP STAGE 11D — STAGING VERIFICATION & LAUNCH SAFETY
-=============================================================
+SMARTMART ERP — WHOLESALE PRICING NEXT STEP
+21 November 2026
 
-IMPORTANT
-  Stage 11D verifies a deployment; it does not create one.
-  Do NOT assume your Render site is online until Render shows Live.
-  This package does not modify local database, stock, settings, staff, or sales.
+Your last reported operations audit:
+- Products: 4,934
+- Unpriced retail: 0
+- Unpriced wholesale: 4,926
+- Unstocked: 4,926
 
-WINDOWS INSTALL
-  1. Download ZIP to Downloads.
-  2. Open VS Code terminal in SmartMartERP project root.
-  3. Stop runserver if desired (not required).
-  4. Run:
-     Expand-Archive -LiteralPath "$env:USERPROFILE\Downloads\SmartMartERP_Stage11D_Staging_Verification.zip" -DestinationPath . -Force
-     python install_smartmart_stage11d.py
-     python smartmart_stage11d_verify.py --mode local
+WHAT THIS PACKAGE DOES
+Provides a PROVISIONAL wholesale selling-price policy: 5% below each
+retail price, for wholesale quantities already configured on each product
+(default six units for generic products). This is a business rule, NOT an
+independently verified Kenyan wholesale or supplier-cost quotation.
 
-  Optional thorough test suite (creates and destroys ONLY Django temporary test DB):
-     python smartmart_stage11d_verify.py --mode local --full-tests
+Recommended safe workflow: calculate from your LIVE SmartMart prices.
+1. Extract this ZIP into your existing SmartMartERP project directory.
+2. In the activated .venv PowerShell, from the SmartMartERP root:
+   python smartmart_prepare_wholesale_from_live.py
+3. The script only reads the database. It creates two CSV files in the
+   project root: SmartMart_Live_Wholesale_Import_...csv and
+   SmartMart_Live_Wholesale_Review_...csv.
+4. Review the second file and validate intended margin versus actual
+   supplier acquisition costs. The script will refuse to propose wholesale
+   prices below any positive supplier cost already stored.
+5. Create verified backup: python smartmart_backup.py
+6. Start local Django: python manage.py runserver 8002
+7. Log in as the Django superuser at http://127.0.0.1:8002/pricing/
+8. Select ONLY the ...Live_Wholesale_Import_...csv.
+9. Click Check / Preview. Confirm count and intended changes.
+10. Select the SAME CSV again if required and import approved wholesale prices.
+11. Back in PowerShell, run: python manage.py smartmart_audit
+    Expected unpriced wholesale: 0 if all 4,926 SKUs were still missing
+    wholesale prices and the entire proposal was accepted.
 
-  Once the Stage 11B Render site is LIVE, run from your Windows terminal:
-     python smartmart_stage11d_verify.py --mode remote --url https://YOUR-ACTUAL-SERVICE.onrender.com
+ALTERNATIVE STATIC PROPOSAL
+- SmartMart_Kenya_Wholesale_Proposal_4926.csv is precomputed at 5% below
+  the EARLIER estimated retail file. It may be STALE if your live retail
+  prices differ from those estimates. Prefer generating from live.
+- SmartMart_Kenya_Wholesale_Review_4926.xlsx is a reference review file.
+  Its formulas can be edited, but XLSX cannot be uploaded directly to /pricing/.
 
-  Then run in your Render web-service SHELL, from the deployed project folder:
-     python smartmart_stage11d_verify.py --mode server
+SCOPE AND SAFETY
+- Only 4,926 original SmartMart bulk SKUs are selected; the eight starter
+  training products remain untouched.
+- Import CSV has only: sku,wholesale_price. It cannot change retail,
+  supplier cost, taxes, wholesale thresholds, staff, sales or stock.
+- Live proposal script makes ZERO database writes. It skips already-priced
+  products and stops if positive supplier costs indicate below-cost pricing.
+- Actual wholesale profit margins CANNOT be verified without supplier costs.
+- A retail discount is NOT evidence of the Kenyan wholesale market rate.
+- Never set fictitious stock or cost prices.
 
-  Note: Render needs the Stage11D script in the GitHub repository to use it in Shell.
-  Git review:
-     git add smartmart_stage11d_verify.py
-     git diff --cached --name-only
-     git commit -m "Add read-only SmartMart staging verification"
-     git push origin main
-
-  Never put DATABASE_URL, API tokens, passwords, or real customer data into chat.
-  The complete review checklist is in stage11d_verification/README.md.
-
-EXIT STATUS
-  0: automated checks passed; manual review items may remain.
-  2: one or more checks failed; do not treat staging as launch-ready.
-
-No production launch authorization, payments, or tax-compliance certification
-is provided by these checks.
+If any preview or test fails, stop. Do not reset db.sqlite3.

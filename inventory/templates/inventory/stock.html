@@ -8,7 +8,7 @@
  <form method="get" class="inventory-search" role="search">
   {% if branches %}<label for="branch-choice">Branch</label><select id="branch-choice" class="inventory-input" name="branch">{% for candidate in branches %}<option value="{{ candidate.id }}" {% if candidate.id == branch.id %}selected{% endif %}>{{ candidate.name }} ({{ candidate.code }})</option>{% endfor %}</select>{% else %}<strong>{{ branch.name }}</strong>{% endif %}
   <label class="sr-only" for="stock-search">Search stock</label><input id="stock-search" class="inventory-input" name="q" value="{{ query }}" placeholder="Product, SKU or barcode"><button class="button button-primary" type="submit">Filter</button>
- </form><div class="inventory-actions"><a class="button button-soft" href="{% url 'inventory:movements' %}?branch={{ branch.pk }}">Movement history</a><a class="button button-soft" href="{% url 'inventory:product_list' %}">Catalogue</a></div>
+ </form><div class="inventory-actions"><!-- SMARTMART_STAGE13C_STOCK --><a class="button button-soft" href="{% url 'stock_alerts:home' %}?branch={{ branch.pk }}">Low-stock alerts →</a><a class="button button-soft" href="{% url 'inventory:movements' %}?branch={{ branch.pk }}">Movement history</a><a class="button button-soft" href="{% url 'inventory:product_list' %}">Catalogue</a></div>
 </div>
 <div class="inventory-panel"><div class="inventory-panel-title"><h2>{{ branch.name }} stock</h2><span>{{ page.paginator.count }} products</span></div>
 <div class="inventory-table-wrap"><table class="inventory-table"><thead><tr><th>Product</th><th>SKU</th><th>Available</th><th>Reorder at</th><th>Status</th><th>Manage</th></tr></thead><tbody>

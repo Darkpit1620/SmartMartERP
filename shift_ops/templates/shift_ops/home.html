@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Cashier Shifts | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'shift_ops/css/shifts.css' %}">
+<section class="wrap shift-shell">
+  <p><a href="{% url 'core:dashboard' %}">← My workspace</a> · <a href="{% url 'pos:sales' %}">Sales receipts</a></p>
+  <div class="shift-head"><div><span class="shift-eyebrow">CASH OPERATIONS · KES</span><h1>Cashier shifts</h1><p>Count opening cash, record verified drawer movements, reconcile expected cash, and review shortages or overages.</p></div><div class="shift-pill">Audit trail enabled</div></div>
+  {% if messages %}<div class="shift-messages">{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}</div>{% endif %}
+  {% if can_open %}
+  <section class="shift-card"><h2>Your cash drawer</h2>
+    {% if my_open_shift %}<p>Your current shift is <a href="{% url 'shift_ops:detail' my_open_shift.pk %}">#{{ my_open_shift.pk }}</a>. Close it before opening another.</p><a class="button button-primary" href="{% url 'shift_ops:detail' my_open_shift.pk %}">Continue open shift →</a>
+    {% else %}<form action="{% url 'shift_ops:start' %}" method="post" class="shift-form">{% csrf_token %}<label>Counted opening float (KES)<input type="number" min="0" max="999999999999.99" step="0.01" name="opening_cash" required value="0.00"></label><button class="button button-primary" type="submit">Open my shift</button></form>{% endif %}
+  </section>
+  {% endif %}
+  <section class="shift-card"><h2>Shift history</h2><div class="shift-scroll"><table class="shift-table"><thead><tr><th>Shift</th><th>Branch</th><th>Cashier</th><th>Opened</th><th>Status</th><th>Expected</th><th>Difference</th><th></th></tr></thead><tbody>
+  {% for shift in page %}<tr><td>#{{ shift.pk }}</td><td>{{ shift.branch.code }}</td><td>{{ shift.cashier.username }}</td><td>{{ shift.opened_at|date:'d M Y H:i' }}</td><td>{{ shift.get_status_display }}</td><td>{% if shift.expected_cash is not None %}KES {{ shift.expected_cash|floatformat:2 }}{% else %}Live{% endif %}</td><td>{% if shift.variance is not None %}KES {{ shift.variance|floatformat:2 }}{% else %}—{% endif %}</td><td><a href="{% url 'shift_ops:detail' shift.pk %}">View →</a></td></tr>
+  {% empty %}<tr><td colspan="8">No cashier shifts recorded for your account or branch.</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% if page.has_other_pages %}<p>{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">← Previous</a>{% endif %} Page {{ page.number }} of {{ page.paginator.num_pages }} {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Next →</a>{% endif %}</p>{% endif %}
+  </section>
+  <p class="shift-note"><strong>Important:</strong> Only cash sales on the original POS receipts are counted. M-Pesa, card and bank payments are excluded. A refund affects this drawer only if a manager separately records an actual cash paid-out entry.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Loyalty Members | SmartMart ERP{% endblock %}
+{% block content %}<link rel="stylesheet" href="{% static 'loyalty_ops/css/loyalty.css' %}">
+<main class="loy-shell"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><span>Loyalty</span></div>
+  <div class="loy-heading"><div><div class="section-eyebrow">SMARTMART STAGE 13H</div><h1>Customer Loyalty &amp; Rewards</h1><p>Consent-based memberships, paid receipt history and controlled reward requests. Earn 1 point per completed KES 100.</p></div>
+    <div><a class="button button-primary" href="{% url 'loyalty_ops:enroll' %}">+ Enroll member</a> <a class="button button-soft" href="{% url 'loyalty_ops:rewards' %}">Manage rewards</a></div></div>
+  {% for message in messages %}<div class="loy-message">{{ message }}</div>{% endfor %}
+  <section class="loy-card"><h2>Member directory</h2><form method="get" class="loy-search"><label for="loy-q">Search by member code, name or phone</label><input id="loy-q" name="q" value="{{ q }}" maxlength="100"><button class="button button-primary">Search</button></form>
+    <div class="loy-scroll"><table><thead><tr><th>Member code</th><th>Customer</th><th>Branch</th><th>State</th><th>Details</th></tr></thead><tbody>{% for member in page %}<tr><td>{{ member.member_code }}</td><td>{{ member.full_name }}</td><td>{{ member.branch.name }}</td><td>{% if member.active %}Active{% else %}Suspended{% endif %}</td><td><a href="{% url 'loyalty_ops:member' member.pk %}">Open →</a></td></tr>{% empty %}<tr><td colspan="5">No customers match the search. Enroll only with customer consent.</td></tr>{% endfor %}</tbody></table></div>
+    <div class="loy-pages">Page {{ page.number }} of {{ page.paginator.num_pages }} {% if page.has_previous %}<a href="?q={{ q|urlencode }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %}{% if page.has_next %}<a href="?q={{ q|urlencode }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}</div>
+  </section><p class="loy-foot">Only authorized staff can see member details. This is not a customer self-service portal.</p>
+</div></main>{% endblock %}

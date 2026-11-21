@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Cashier Shift #{{ shift.pk }} | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'shift_ops/css/shifts.css' %}">
+<section class="wrap shift-shell">
+<p><a href="{% url 'shift_ops:home' %}">← Cashier shifts</a> · <a href="{% url 'pos:sales' %}">Sales receipts</a></p>
+<div class="shift-head"><div><span class="shift-eyebrow">CASH RECONCILIATION</span><h1>Shift #{{ shift.pk }}</h1><p>{{ shift.branch.name }} · Cashier {{ shift.cashier.username }} · {{ shift.get_status_display }}</p></div><div class="shift-pill">{{ shift.opened_at|date:'d M Y H:i' }}</div></div>
+{% if messages %}<div class="shift-messages">{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}</div>{% endif %}
+<div class="shift-metrics">
+<div class="shift-metric"><small>Opening float</small><strong>KES {{ shift.opening_cash|floatformat:2 }}</strong></div>
+<div class="shift-metric"><small>Cash sales</small><strong>KES {{ totals.cash_sales|floatformat:2 }}</strong></div>
+<div class="shift-metric"><small>Cash paid in</small><strong>KES {{ totals.paid_in_total|floatformat:2 }}</strong></div>
+<div class="shift-metric"><small>Cash paid out</small><strong>KES {{ totals.paid_out_total|floatformat:2 }}</strong></div>
+<div class="shift-metric shift-feature"><small>Expected drawer cash</small><strong>KES {{ totals.expected_cash|floatformat:2 }}</strong></div>
+{% if shift.status != 'OPEN' %}<div class="shift-metric"><small>Physically counted</small><strong>KES {{ shift.closing_cash|floatformat:2 }}</strong></div><div class="shift-metric"><small>Difference (+ over / - short)</small><strong>KES {{ shift.variance|floatformat:2 }}</strong></div>{% endif %}
+</div>
+<section class="shift-card"><h2>Shift record</h2><p><strong>Opened:</strong> {{ shift.opened_at|date:'d M Y H:i:s' }}</p>
+{% if shift.closed_at %}<p><strong>Closed:</strong> {{ shift.closed_at|date:'d M Y H:i:s' }} by {{ shift.closed_by.username }}</p><p><strong>Closing note:</strong> {{ shift.closing_note|default:'—' }}</p>{% endif %}
+{% if shift.reviewed_at %}<p><strong>Reviewed:</strong> {{ shift.reviewed_at|date:'d M Y H:i:s' }} by {{ shift.reviewed_by.username }}</p><p><strong>Review note:</strong> {{ shift.review_note|default:'—' }}</p>{% endif %}</section>
+{% if shift.status == 'OPEN' and can_manage %}
+<section class="shift-card"><h2>Manager-recorded physical cash movement</h2><p>Use only for cash that has actually entered or left this drawer. This form does not make payments or issue refunds.</p>
+<form class="shift-form" method="post" action="{% url 'shift_ops:entry' shift.pk %}">{% csrf_token %}
+<label>Movement<select name="kind" required><option value="IN">Cash added to drawer</option><option value="OUT">Cash taken from drawer</option></select></label>
+<label>Amount (KES)<input type="number" min="0.01" max="999999999999.99" step="0.01" name="amount" required></label>
+<label>Unique transaction reference<input type="text" name="reference" minlength="3" maxlength="100" required placeholder="e.g. RETURN-123 or FLOAT-2"></label>
+<label>Reason / audit note<textarea name="note" minlength="8" maxlength="300" required rows="3"></textarea></label>
+<button type="submit" class="button button-primary">Record actual cash movement</button></form>
+<p class="shift-note">For a cash refund paid from this drawer, first finish the refund through the returns workflow. Then record a cash paid-out entry with the related reference. Never record it twice.</p></section>
+{% endif %}
+{% if shift.status == 'OPEN' and can_close %}
+<section class="shift-card"><h2>Close and count the drawer</h2><p>Physically count the cash before submitting. The reconciliation is stored as a permanent snapshot and cannot be edited afterward.</p>
+<form method="post" action="{% url 'shift_ops:finish' shift.pk %}" class="shift-form">{% csrf_token %}
+<label>Physically counted cash (KES)<input type="number" min="0" max="999999999999.99" step="0.01" name="closing_cash" required></label>
+<label>Closing note (required for manager emergency closure)<textarea name="note" maxlength="300" rows="2"></textarea></label>
+<button type="submit" class="button button-primary">Close and reconcile shift</button></form></section>
+{% endif %}
+{% if shift.status == 'CLOSED' and can_manage %}
+<section class="shift-card"><h2>Manager review</h2><p>Review the expected cash, counted cash and variance. Variances require a written explanation; review does not erase them.</p>
+<form method="post" action="{% url 'shift_ops:review' shift.pk %}" class="shift-form">{% csrf_token %}
+<label>Review note<textarea name="note" maxlength="300" rows="3" placeholder="Write how the cash difference was checked"></textarea></label>
+<button type="submit" class="button button-primary">Mark reconciliation as reviewed</button></form></section>
+{% endif %}
+<section class="shift-card"><h2>Cash-drawer audit entries</h2><div class="shift-scroll"><table class="shift-table"><thead><tr><th>Time</th><th>Movement</th><th>Amount</th><th>Reference</th><th>Reason</th><th>Recorded by</th></tr></thead><tbody>
+{% for e in entries %}<tr><td>{{ e.created_at|date:'d M H:i' }}</td><td>{{ e.get_kind_display }}</td><td>KES {{ e.amount|floatformat:2 }}</td><td>{{ e.reference }}</td><td>{{ e.note }}</td><td>{{ e.recorded_by.username }}</td></tr>
+{% empty %}<tr><td colspan="6">No separate physical cash movements.</td></tr>{% endfor %}
+</tbody></table></div></section>
+<section class="shift-card"><h2>Cash receipts during this shift</h2><div class="shift-scroll"><table class="shift-table"><thead><tr><th>Time</th><th>Receipt</th><th>Sale type</th><th>Amount</th></tr></thead><tbody>
+{% for sale in sales %}<tr><td>{{ sale.created_at|date:'d M H:i' }}</td><td><a href="{% url 'pos:receipt' sale.pk %}">{{ sale.receipt_number }}</a></td><td>{{ sale.get_sale_type_display }}</td><td>KES {{ sale.subtotal|floatformat:2 }}</td></tr>
+{% empty %}<tr><td colspan="4">No cash sales recorded during this shift.</td></tr>{% endfor %}
+</tbody></table></div><p class="shift-note">Showing up to 100 recent cash receipts. The totals include every qualifying cash receipt.</p></section>
+<p class="shift-note"><strong>Reconciliation rule:</strong> opening float + cash sales + physically paid-in cash − physically paid-out cash = expected cash. Counted cash − expected cash = difference. POS currently permits sales without opening a shift; those sales will not belong to an earlier shift. Electronic payments are excluded.</p>
+</section>
+{% endblock %}

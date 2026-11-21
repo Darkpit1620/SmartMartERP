@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Print Product Labels | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'label_printing/css/labels.css' %}">
+<div class="dashboard-area label-centre label-print-page"><div class="wrap">
+  <div class="label-print-toolbar"><div><h1>Product label print preview</h1><p>{{ count }} labels ready. {% if mode == 'shelf' %}A4 shelf price tags{% else %}A4 barcode stickers{% endif %}.</p></div>
+    <div class="label-print-actions"><a class="button button-soft" href="{% url 'label_printing:home' %}">Back to labels</a><button type="button" class="button button-primary" onclick="window.print()">Print labels</button></div>
+  </div>
+  {% if skipped %}<aside class="label-note label-skips"><strong>Not printed:</strong><ul>{% for entry in skipped %}<li>{{ entry }}</li>{% endfor %}</ul></aside>{% endif %}
+  <div class="label-sheet {% if mode == 'barcode' %}label-sheet-barcodes{% else %}label-sheet-shelves{% endif %}">
+    {% for entry in labels %}<div class="label-ticket">
+      <div class="label-ticket-brand">SMARTMART</div>
+      <div class="label-ticket-name">{{ entry.product.name }}</div>
+      {% if mode == 'shelf' %}<div class="label-ticket-price"><small>KES</small> {{ entry.price }}</div>{% endif %}
+      <div class="label-ticket-svg">{% if entry.svg %}{{ entry.svg }}{% else %}<span class="label-manual">Manual SKU lookup only</span>{% endif %}</div>
+      <div class="label-ticket-id">{% if entry.code %}{{ entry.code }}{% else %}{{ entry.product.sku }}{% endif %}</div>
+      {% if mode == 'barcode' %}<div class="label-ticket-mini-price">KES {{ entry.price }}</div>{% endif %}
+    </div>{% endfor %}
+  </div>
+  <p class="label-print-footnote">Code 128 labels identify products in SmartMart. They do not create or certify EAN/UPC/GTIN numbers. Test printer size and scanner before use.</p>
+</div></div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% block title %}Return #{{ case.pk }} | SmartMart ERP{% endblock %}
+{% block content %}
+<section class="wrap" style="padding:32px 16px 70px;max-width:900px">
+  <p><a href="{% url 'returns_ops:home' %}">← Returns</a> · <a href="{% url 'pos:receipt' case.sale.pk %}">Original receipt</a></p>
+  <h1>Return #{{ case.pk }}</h1>
+  {% if messages %}{% for message in messages %}<p role="alert">{{ message }}</p>{% endfor %}{% endif %}
+  <div style="border:1px solid #ddd;border-radius:10px;padding:18px;margin-bottom:22px">
+    <p><strong>Receipt:</strong> {{ case.sale.receipt_number }} · {{ case.sale.branch.name }}</p>
+    {% for line in lines %}<p><strong>Product:</strong> {{ line.sale_item.description }} ({{ line.sale_item.sku }}) · Qty {{ line.quantity|floatformat:-3 }}</p>{% endfor %}
+    <p><strong>Amount:</strong> KES {{ case.amount|floatformat:2 }}</p>
+    <p><strong>Reason:</strong> {{ case.reason }}</p>
+    <p><strong>Status:</strong> {{ case.get_status_display }}</p>
+    {% if case.status == 'APPROVED' %}
+      <p><strong>Inventory:</strong> {% if case.restocked %}Approved items restored to available stock{% else %}Not restocked (inspect/quarantine separately){% endif %}</p>
+      <p><strong>Refund:</strong> {{ case.get_refund_status_display }}</p>
+    {% endif %}
+    {% if case.reviewed_by %}<p><strong>Reviewed by:</strong> {{ case.reviewed_by.username }} · {{ case.review_note }}</p>{% endif %}
+    {% if case.refunded_at %}<p><strong>Refund recorded by:</strong> {{ case.refunded_by.username }} · {{ case.get_refund_method_display }} · {{ case.refund_reference }} · {{ case.refunded_at|date:'d M Y, H:i' }}</p>{% endif %}
+  </div>
+  {% if can_review and case.status == 'REQUESTED' %}
+  <h2>Manager review</h2>
+  <form method="post" action="{% url 'returns_ops:review' case.pk %}" style="display:grid;gap:12px;max-width:620px">
+    {% csrf_token %}
+    <label>Decision <select name="decision" required style="padding:10px"><option value="approve">Approve return</option><option value="reject">Reject return</option></select></label>
+    <label>Review note (required when rejecting) <textarea name="note" maxlength="300" rows="3" style="width:100%;padding:10px"></textarea></label>
+    <label><input type="checkbox" name="restock" value="yes"> Goods physically received, inspected, and suitable for resale. Add them back to available stock (approval only).</label>
+    <button type="submit" class="button button-primary">Save manager decision</button>
+  </form>
+  <p><strong>Warning:</strong> Leave restock unchecked for damaged, contaminated or uninspected goods. Approval does not pay a refund.</p>
+  {% endif %}
+  {% if can_review and case.status == 'APPROVED' and case.refund_status == 'PENDING' %}
+  <h2>Record completed refund</h2>
+  <p>First pay or verify the refund independently. This form records an already completed payout only. It cannot send money.</p>
+  <form method="post" action="{% url 'returns_ops:record_refund' case.pk %}" style="display:grid;gap:12px;max-width:620px">
+    {% csrf_token %}
+    <label>Method <select name="refund_method" required style="padding:10px"><option value="CASH">Cash</option><option value="MPESA">M-Pesa</option><option value="CARD">Card</option><option value="BANK">Bank transfer</option></select></label>
+    <label>Actual refund receipt / provider reference (mandatory for non-cash)
+      <input name="refund_reference" maxlength="120" style="display:block;width:100%;padding:10px">
+    </label>
+    <label><input type="checkbox" name="confirmed" value="yes" required> I confirm the customer has actually received KES {{ case.amount|floatformat:2 }} outside SmartMart ERP.</label>
+    <button type="submit" class="button button-primary">Record refund as paid</button>
+  </form>
+  {% endif %}
+  <p style="color:#667">Financial dashboards and cashier shift totals do not automatically include these refund records in Stage 13A. Reconcile payments separately before using reports for accounting.</p>
+</section>
+{% endblock %}

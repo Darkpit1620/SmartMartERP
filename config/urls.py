@@ -18,6 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('supplier-accounts/', include('supplier_accounts.urls')),
+    path('labels/', include('label_printing.urls')),
+    path('documents/', include('sales_documents.urls')),
+    path('insights/', include('reporting_insights.urls')),
+    path('alerts/', include('stock_alerts.urls')),
+    path('shifts/', include('shift_ops.urls')),
+    path('returns/', include('returns_ops.urls')),
     path("transaction-tests/", include("transaction_checks.urls")),
     path("employees/", include("staff_activation.urls")),
     path("pricing/", include("pricing_portal.urls")),

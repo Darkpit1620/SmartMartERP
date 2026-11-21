@@ -35,6 +35,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'supplier_accounts.apps.SupplierAccountsConfig',
+    'label_printing.apps.LabelPrintingConfig',
+    'sales_documents.apps.SalesDocumentsConfig',
+    'reporting_insights.apps.ReportingInsightsConfig',
+    'stock_alerts.apps.StockAlertsConfig',
+    'shift_ops.apps.ShiftOpsConfig',
+    'returns_ops.apps.ReturnsOpsConfig',
     "transaction_checks.apps.TransactionChecksConfig",
     "staff_activation.apps.StaffActivationConfig",
     "pricing_portal.apps.PricingPortalConfig",

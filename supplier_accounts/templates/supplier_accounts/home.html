@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Supplier Accounts | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'supplier_accounts/css/accounts.css' %}">
+<div class="supp-area"><div class="wrap">
+  <div class="supp-hero"><small>FINANCE · SUPPLIER LIABILITIES</small><h1>Supplier Invoices &amp; Outstanding Balances</h1><p>Record genuine supplier invoices against purchase orders, track payments actually made, and review what remains owing. This ledger does not transfer money or alter stock.</p></div>
+  {% for msg in messages %}<p class="supp-flash">{{ msg }}</p>{% endfor %}
+  <div class="supp-line"><div class="supp-actions"><a class="button button-primary" href="{% url 'supplier_accounts:invoice_new' %}{% if branch %}?branch={{ branch.pk }}{% endif %}">+ Record invoice</a><a class="button button-outline" href="{% url 'supplier_accounts:export' %}{% if branch %}?branch={{ branch.pk }}{% endif %}">Export CSV</a><a class="button button-outline" href="{% url 'trading:home' %}">Purchase orders</a></div></div>
+  {% if branches %}<form method="get" class="supp-panel supp-actions"><label for="br">Branch</label><select id="br" name="branch">{% for b in branches %}<option value="{{ b.pk }}" {% if branch.pk == b.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select><button type="submit" class="button button-primary">Select</button></form>{% endif %}
+  {% if branch %}<div class="supp-kpis"><div class="supp-kpi"><strong>KES {{ invoiced|floatformat:2 }}</strong><small>Total supplier invoices · {{ branch.name }}</small></div><div class="supp-kpi"><strong>KES {{ paid|floatformat:2 }}</strong><small>Payments manually recorded</small></div><div class="supp-kpi"><strong>KES {{ outstanding|floatformat:2 }}</strong><small>Outstanding supplier balances</small></div><div class="supp-kpi"><strong>{{ invoice_count }}</strong><small>Supplier invoices recorded</small></div></div>{% endif %}
+  <section class="supp-panel"><div class="supp-line"><h2>Invoice ledger</h2><form method="get" class="supp-actions">{% if branch %}<input type="hidden" name="branch" value="{{ branch.pk }}">{% endif %}<input name="q" value="{{ search }}" placeholder="Search supplier or invoice" aria-label="Search invoices"><button class="button button-outline" type="submit">Search</button></form></div>
+  {% if list_truncated %}<p class="supp-muted">Only the first 200 matches are shown. Export CSV to retrieve the complete selected-branch ledger.</p>{% endif %}
+  <div class="supp-table-wrap"><table class="supp-table"><thead><tr><th>Supplier</th><th>Invoice</th><th>PO</th><th>Due</th><th>Invoice KES</th><th>Paid KES</th><th>Balance KES</th><th>Status</th></tr></thead><tbody>
+  {% for item in invoices %}<tr><td>{{ item.supplier.name }}</td><td><a href="{% url 'supplier_accounts:detail' item.pk %}?branch={{ branch.pk }}">{{ item.invoice_number }}</a></td><td>{{ item.purchase_order.reference }}</td><td>{{ item.due_date }}</td><td>{{ item.amount|floatformat:2 }}</td><td>{{ item.ledger_paid|floatformat:2 }}</td><td>{{ item.ledger_balance|floatformat:2 }}</td><td><span class="supp-badge">{{ item.state }}</span></td></tr>
+  {% empty %}<tr><td colspan="8" class="supp-muted">No supplier invoices for this branch yet.</td></tr>{% endfor %}
+  </tbody></table></div></section>
+  <p class="supp-help">Purchase orders without a recorded supplier invoice are not included in outstanding balances. Payment records reflect staff-entered confirmations, not independently verified bank statements. This is not a KRA eTIMS invoice system.</p>
+</div></div>
+{% endblock %}

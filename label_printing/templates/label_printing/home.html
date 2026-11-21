@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Product Labels | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'label_printing/css/labels.css' %}">
+<div class="dashboard-area label-centre"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><span>Barcode &amp; shelf labels</span></div>
+  <section class="label-hero"><span class="label-eyebrow">STAGE 13F • PRODUCT LABELLING</span>
+    <h1>Barcode labels &amp; shelf price tags</h1>
+    <p>Select active products by SKU, then preview printable tags. Prices come directly from the verified product catalogue.</p>
+  </section>
+  <div class="label-note"><strong>Printing safety:</strong> Unpriced products cannot be printed. Barcode symbols use Code 128 subset B with an existing barcode or SKU. Scanner compatibility should be checked before using labels in a real store. No price, SKU or stock record is changed.</div>
+  <section class="label-panel"><h2>1. Find products</h2>
+    <form method="get" class="label-search" role="search">
+      <label for="label-query">Product name, SKU or barcode</label>
+      <div class="label-search-row"><input id="label-query" name="q" value="{{ query }}" placeholder="e.g. cooking oil or SKU" maxlength="80"><button class="button button-primary" type="submit">Search</button></div>
+    </form>
+  </section>
+  <form method="post" action="{% url 'label_printing:preview' %}">
+    {% csrf_token %}
+    <section class="label-panel"><h2>2. Select products</h2>
+      <div class="label-table-scroll"><table class="label-table"><thead><tr><th>Choose</th><th>Name</th><th>SKU</th><th>Barcode</th><th>Retail price (KES)</th></tr></thead><tbody>
+      {% for product in page %}
+        <tr><td><input type="checkbox" name="selected_skus" value="{{ product.sku }}" aria-label="Select {{ product.name }}"></td>
+          <td>{{ product.name }}{% if product.retail_price <= 0 %} <span class="label-pending">Price pending</span>{% endif %}</td>
+          <td><code>{{ product.sku }}</code></td><td>{{ product.barcode|default:'—' }}</td><td>{% if product.retail_price > 0 %}{{ product.retail_price|floatformat:2 }}{% else %}Not set{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="5">No matching active products.</td></tr>{% endfor %}
+      </tbody></table></div>
+      <p class="label-muted">Showing {{ page.paginator.count }} matching products, 25 per page. You can also paste SKUs below to print products from other pages.</p>
+      {% if page.has_other_pages %}<div class="label-pagination">
+        {% if page.has_previous %}<a href="?q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %}
+        Page {{ page.number }} of {{ page.paginator.num_pages }}
+        {% if page.has_next %}<a href="?q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}
+      </div>{% endif %}
+    </section>
+    <section class="label-panel"><h2>3. Choose your label layout</h2>
+      <div class="label-controls">
+        <label for="sku-list">Additional product SKUs <small>(optional; one per line or comma-separated)</small>
+          <textarea id="sku-list" name="skus" rows="3" maxlength="2500" placeholder="SKU-1001&#10;SKU-1002"></textarea>
+        </label>
+        <label for="format">Print format<select id="format" name="mode"><option value="shelf">Shelf price tags (A4)</option><option value="barcode">Barcode stickers (A4)</option></select></label>
+        <label for="copies">Copies per product<select id="copies" name="copies">{% for n in copies_options %}<option value="{{ n }}">{{ n }}</option>{% endfor %}</select></label>
+      </div>
+      <p class="label-muted">Maximum 24 different SKUs and 8 copies per SKU (up to 192 labels). Label printing is read-only.</p>
+      <button class="button button-primary" type="submit">Preview labels to print</button>
+    </section>
+  </form>
+</div></div>
+{% endblock %}

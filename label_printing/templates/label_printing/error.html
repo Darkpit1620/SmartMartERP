@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Label Selection Error | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'label_printing/css/labels.css' %}">
+<div class="dashboard-area label-centre"><div class="wrap"><section class="label-panel"><h1>Cannot create labels</h1>
+  {% for err in errors %}<p class="label-error">{{ err }}</p>{% endfor %}
+  <a class="button button-primary" href="{% url 'label_printing:home' %}">Return to product labels</a>
+</section></div></div>
+{% endblock %}

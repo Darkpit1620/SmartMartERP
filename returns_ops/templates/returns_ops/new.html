@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+{% block title %}New Return | SmartMart ERP{% endblock %}
+{% block content %}
+<section class="wrap" style="padding:32px 16px 70px;max-width:840px">
+  <p><a href="{% url 'pos:receipt' sale.pk %}">← Original receipt</a></p>
+  <h1>Request a return</h1>
+  <p>Receipt <strong>{{ sale.receipt_number }}</strong> · {{ sale.branch.name }} · KES {{ sale.subtotal|floatformat:2 }}</p>
+  <p>Select one receipt item per request. Partial quantities are allowed. A manager must approve each request.</p>
+  {% if sale.payment_status == 'UNVERIFIED' %}<p role="alert">The original payment has not been verified. Contact your manager before requesting a return.</p>{% endif %}
+  {% if messages %}{% for message in messages %}<p role="alert" style="color:#9b2f22">{{ message }}</p>{% endfor %}{% endif %}
+  <form method="post" style="display:grid;gap:16px;max-width:620px">
+    {% csrf_token %}
+    <label>Receipt item
+      <select name="sale_item_id" required style="display:block;width:100%;padding:10px">
+        {% for item in items %}<option value="{{ item.pk }}">{{ item.sku }} — {{ item.description }} — sold {{ item.quantity|floatformat:-3 }} — KES {{ item.line_total|floatformat:2 }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Quantity to return
+      <input type="number" name="quantity" min="0.001" step="0.001" required placeholder="Example: 1" style="display:block;width:100%;padding:10px">
+    </label>
+    <label>Reason for return (8–500 characters)
+      <textarea name="reason" required minlength="8" maxlength="500" rows="4" style="display:block;width:100%;padding:10px"></textarea>
+    </label>
+    <button class="button button-primary" type="submit">Submit for review</button>
+  </form>
+  <p>Submitting does not increase stock or issue money. Keep returned items separate until a manager inspects them.</p>
+</section>
+{% endblock %}

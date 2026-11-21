@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Low-Stock Alerts | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'stock_alerts/css/alerts.css' %}">
+<div class="dashboard-area stock-alerts-area"><div class="wrap">
+  <div class="breadcrumbs"><a href="{% url 'core:dashboard' %}">My workspace</a><span>›</span><span>Low-stock alerts</span></div>
+  <section class="sa-hero">
+    <div><span class="sa-eyebrow">STAGE 13C · BRANCH INVENTORY PLANNING</span>
+      <h1>Low-stock alerts &amp; reorder suggestions</h1>
+      <p>Review products that need replenishment before preparing supplier orders. Recommendations never create an order automatically.</p>
+    </div><span class="sa-hero-icon" aria-hidden="true">▥</span>
+  </section>
+  {% if not branch %}
+    <div class="sa-panel"><h2>No active branches</h2><p>Ask an administrator to activate or create a branch before reviewing stock alerts.</p></div>
+  {% else %}
+    <div class="sa-summary">
+      <div class="sa-metric"><strong>{{ total_low }}</strong><span>Products at/below threshold</span></div>
+      <div class="sa-metric"><strong>{{ out_of_stock }}</strong><span>Out of stock or no balance recorded</span></div>
+      <div class="sa-metric"><strong>{{ setup_pending }}</strong><span>Unpriced catalogue products excluded</span></div>
+    </div>
+    <section class="sa-panel sa-filters">
+      <form method="get" action="{% url 'stock_alerts:home' %}" class="sa-filter-form">
+        {% if branches %}<label for="sa-branch">Branch</label><select id="sa-branch" name="branch">
+          {% for opt in branches %}<option value="{{ opt.pk }}" {% if opt.pk == branch.pk %}selected{% endif %}>{{ opt.name }} ({{ opt.code }})</option>{% endfor %}</select>
+        {% else %}<strong class="sa-branch">{{ branch.name }}</strong>{% endif %}
+        <label for="sa-query">Search</label><input id="sa-query" name="q" value="{{ query }}" placeholder="Name, SKU or barcode">
+        <label for="sa-status">Status</label><select id="sa-status" name="status">
+          <option value="all" {% if status == 'all' %}selected{% endif %}>All alerts</option>
+          <option value="out" {% if status == 'out' %}selected{% endif %}>Out of stock</option>
+          <option value="low" {% if status == 'low' %}selected{% endif %}>Low, some stock</option>
+        </select><button class="button button-primary" type="submit">Apply filters</button>
+      </form>
+      <div class="sa-actions">
+        <a class="button button-soft" href="{% url 'stock_alerts:export_csv' %}?branch={{ branch.pk }}&amp;q={{ query|urlencode }}&amp;status={{ status }}">Download filtered reorder CSV</a>
+        <a class="button button-soft" href="{% url 'inventory:stock_list' %}?branch={{ branch.pk }}">Inventory &amp; stock</a>
+        {% if user.is_superuser or user.store_profile.role == 'MANAGER' %}<a class="button button-soft" href="{% url 'trading:home' %}">Purchasing workspace</a>{% endif %}
+      </div>
+    </section>
+    <section class="sa-panel">
+      <div class="sa-table-heading"><h2>{{ branch.name }} · Needs review</h2><span>{{ filtered_count }} matching products</span></div>
+      <div class="sa-table-scroll"><table class="sa-table"><thead><tr>
+        <th>Product</th><th>SKU</th><th>On hand</th><th>Reorder level</th><th>Suggested top-up</th><th>Status</th><th>Action</th>
+      </tr></thead><tbody>
+      {% for row in rows %}<tr>
+        <td><strong>{{ row.product.name }}</strong><small>{{ row.product.category.name }} · {{ row.product.get_unit_display }}</small></td>
+        <td>{{ row.product.sku }}</td><td>{{ row.quantity|floatformat:-3 }}{% if not row.recorded %}<small>No stock balance recorded</small>{% endif %}</td>
+        <td>{{ row.product.reorder_level|floatformat:-3 }}</td><td><strong>{{ row.suggested|floatformat:-3 }}</strong> {{ row.product.unit|lower }}</td>
+        <td>{% if row.quantity <= 0 %}<span class="sa-badge danger">Out of stock</span>{% else %}<span class="sa-badge">Low stock</span>{% endif %}</td>
+        <td><a href="{% url 'inventory:product_detail' row.product.pk %}">Product details</a></td>
+      </tr>{% empty %}<tr><td colspan="7" class="sa-empty">No reorder alerts match these filters.</td></tr>{% endfor %}
+      </tbody></table></div>
+      {% if page.has_other_pages %}<div class="sa-pages">
+        {% if page.has_previous %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;q={{ query|urlencode }}&amp;status={{ status }}&amp;page={{ page.previous_page_number }}">Previous</a>{% endif %}
+        <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a class="button button-soft" href="?branch={{ branch.pk }}&amp;q={{ query|urlencode }}&amp;status={{ status }}&amp;page={{ page.next_page_number }}">Next</a>{% endif %}
+      </div>{% endif %}
+    </section>
+    <p class="sa-note"><strong>How these numbers work:</strong> An alert appears when an active, priced product has a positive reorder level and stock is at or below that level. Missing stock balances are treated as zero. The suggested top-up is <strong>two times the reorder level minus current stock</strong>. Products with both selling prices at zero are excluded until pricing is verified. A zero reorder level disables alerts. Suggestions are planning figures, not supplier purchase orders.</p>
+  {% endif %}
+</div></div>
+{% endblock %}

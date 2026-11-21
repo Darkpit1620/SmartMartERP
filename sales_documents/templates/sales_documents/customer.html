@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Invoice Customer Details | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'sales_documents/css/documents.css' %}">
+<div class="doc-wrap doc-narrow"><div class="doc-breadcrumb"><a href="{% url 'sales_documents:commercial_invoice' sale.pk %}">Invoice {{ invoice_number }}</a> / Customer details</div>
+<h1>Customer details</h1><p>Add optional customer details to the document for receipt {{ sale.receipt_number }}. Editing these fields does not edit the original POS sale or payment.</p>
+{% if messages %}{% for message in messages %}<p class="doc-notice">{{ message }}</p>{% endfor %}{% endif %}
+<form class="doc-panel doc-form" method="post">{% csrf_token %}{% for field in form %}<div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="doc-field-error">{{ error }}</p>{% endfor %}</div>{% endfor %}
+{% if form.non_field_errors %}<p class="doc-field-error">{{ form.non_field_errors }}</p>{% endif %}
+<button class="doc-button" type="submit">Save customer details</button></form>
+{% if edits %}<div class="doc-panel"><h2>Recent edit history</h2>{% for edit in edits %}<p>{{ edit.changed_at|date:'d M Y H:i' }} · {{ edit.actor.username }} · {{ edit.changed_fields }}</p>{% endfor %}</div>{% endif %}
+<p class="doc-warning">Customer details contain personal data. Enter only information needed for the customer's invoice, and protect access to the printed document.</p></div>
+{% endblock %}

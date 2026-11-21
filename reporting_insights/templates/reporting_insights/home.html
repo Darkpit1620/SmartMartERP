@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Management Insights | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'reporting_insights/css/reports.css' %}">
+<section class="wrap insights-page">
+  <div class="insights-heading">
+    <div><p class="insights-eyebrow">SMARTMART ERP · READ-ONLY</p><h1>Advanced Management Reports</h1>
+    <p>Confirmed sales, manually recorded refunds, expenses, current inventory valuation and indicative merchandise margin.</p></div>
+    <a class="button button-outline" href="{% url 'reporting_insights:export_csv' %}?{{ request.GET.urlencode }}">Download CSV</a>
+  </div>
+  <form method="get" class="insights-filters">
+    {% if branches is not None %}
+    <label>Branch<select name="branch"><option value="">All branches</option>{% for b in branches %}<option value="{{ b.pk }}" {% if branch and b.pk == branch.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select></label>
+    {% else %}<div class="insights-fixed">Branch: <strong>{{ branch.name }}</strong></div>{% endif %}
+    <label>From<input type="date" name="start" value="{{ start|date:'Y-m-d' }}" required></label>
+    <label>To<input type="date" name="end" value="{{ end|date:'Y-m-d' }}" required></label>
+    <button class="button button-primary" type="submit">Apply filters</button>
+  </form>
+  <p class="insights-muted">Period {{ start|date:'d M Y' }} to {{ end|date:'d M Y' }} · {% if branch %}{{ branch.name }}{% else %}All branches{% endif %} · Values in KES</p>
+  <div class="insights-grid">
+    <article class="insights-card"><span>Confirmed sales · tax included</span><strong>KES {{ report.confirmed_sales|floatformat:2 }}</strong><small>{{ report.confirmed_count }} sales · Cash received or independently verified</small></article>
+    <article class="insights-card"><span>Unverified sales · excluded</span><strong>KES {{ report.unverified_sales|floatformat:2 }}</strong><small>{{ report.unverified_count }} transactions awaiting verification</small></article>
+    <article class="insights-card"><span>Refunds recorded as paid</span><strong>KES {{ report.paid_refunds|floatformat:2 }}</strong><small>{{ report.paid_refund_count }} payouts recorded during selected dates</small></article>
+    <article class="insights-card"><span>Approved operating expenses</span><strong>KES {{ report.approved_expenses|floatformat:2 }}</strong><small>Based on expense date · Pending: KES {{ report.pending_expenses|floatformat:2 }}</small></article>
+  </div>
+  <div class="insights-sections">
+    <section class="insights-panel"><h2>Sales mix</h2><div class="insights-metric"><span>Retail · confirmed</span><strong>KES {{ report.retail_sales|floatformat:2 }}</strong></div><div class="insights-metric"><span>Wholesale · confirmed</span><strong>KES {{ report.wholesale_sales|floatformat:2 }}</strong></div><div class="insights-metric"><span>Tax included in confirmed sales</span><strong>KES {{ report.included_tax|floatformat:2 }}</strong></div></section>
+    <section class="insights-panel"><h2>Indicative merchandise margin</h2>
+      {% if report.estimated_merchandise_margin is not None %}
+      <p class="insights-number">KES {{ report.estimated_merchandise_margin|floatformat:2 }}</p>
+      {% else %}<p class="insights-number insights-warning">Unavailable — missing cost data</p>{% endif %}
+      <p>Confirmed sales less included tax and estimated merchandise cost using <strong>current product costs</strong>. Before returns and operating expenses. Not accounting profit.</p>
+      <div class="insights-metric"><span>Estimated merchandise cost</span><strong>KES {{ report.estimated_cost|floatformat:2 }}</strong></div>
+      <div class="insights-metric"><span>Confirmed sale lines missing usable cost</span><strong>{{ report.missing_cost_lines }}</strong></div>
+      <div class="insights-metric"><span>Confirmed sales missing receipt items</span><strong>{{ report.confirmed_sales_without_items }}</strong></div>
+    </section>
+  </div>
+  <div class="insights-sections">
+    <section class="insights-panel"><h2>Current inventory valuation</h2><p class="insights-number">KES {{ report.inventory_value|floatformat:2 }}</p>
+      <p>Snapshot at current catalogue costs, across {{ report.inventory_stocked_rows }} stocked product–branch records. This is <strong>not</strong> a value for the selected historical dates.</p>
+      <div class="insights-metric"><span>Stock records missing usable cost</span><strong>{{ report.inventory_missing_cost_rows }}</strong></div>
+    </section>
+    <section class="insights-panel"><h2>Confirmed sales · last 14 days within period</h2>
+      <div class="insights-bars">{% for d in report.daily %}<div class="insights-bar-row"><time>{{ d.date|date:'d M' }}</time><div class="insights-track"><div class="insights-fill" style="width:{{ d.width }}%"></div></div><span>{{ d.amount|floatformat:0 }}</span></div>{% endfor %}</div>
+    </section>
+  </div>
+  <section class="insights-panel"><h2>Top products by confirmed sales value</h2><div class="insights-table-wrap"><table class="insights-table"><thead><tr><th>Product</th><th>SKU</th><th>Units</th><th>Sales · tax included (KES)</th></tr></thead><tbody>{% for p in report.top_products %}<tr><td>{{ p.product__name }}</td><td>{{ p.product__sku }}</td><td>{{ p.qty|floatformat:3 }}</td><td>{{ p.gross|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="4">No confirmed sale lines in the selected period.</td></tr>{% endfor %}</tbody></table></div></section>
+  <aside class="insights-note"><strong>Reporting limitations:</strong> Sales are included only after cash receipt or independent electronic-payment verification. Refunds are counted on the date a payout was manually recorded; they have not automatically changed earlier sales or merchandise cost. Product costs are the current catalogue figures, not historical receipt-level costs. Approvals are not proof of bank settlement. These insights are operational estimates and are not audited accounts or a tax return.</aside>
+</section>
+{% endblock %}

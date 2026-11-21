@@ -24,4 +24,22 @@
 
 <!-- SMARTMART_FINANCE_MANAGER -->
 {% if profile.role == "MANAGER" %}<section class="wrap" style="padding-top:15px;padding-bottom:30px"><div class="profile-strip"><div><strong>Branch Finance &amp; Reports</strong><p>Review your branch sales, submit expenses and monitor payment verification.</p></div><a class="button button-primary" href="{% url 'finance_ops:overview' %}">Open branch finance →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13B_STAFF -->
+{% if profile.role == "CASHIER" or profile.role == "MANAGER" %}<section class="wrap" style="padding:18px 0 36px"><div class="profile-strip"><div><strong>Cashier shift management</strong><p>{% if profile.role == "CASHIER" %}Count your opening float and close your drawer.{% else %}Review cash movements and shift variances for your branch.{% endif %}</p></div><a class="button button-primary" href="{% url 'shift_ops:home' %}">Open cashier shifts →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13C_STAFF -->
+{% if profile.role == "MANAGER" or profile.role == "WAREHOUSE" %}<section class="wrap" style="padding:16px 0 36px"><div class="profile-strip"><div><strong>Branch reorder alerts</strong><p>Review low stock, out-of-stock items and suggested reorder quantities at your branch.</p></div><a class="button button-primary" href="{% url 'stock_alerts:home' %}">Stock alerts →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13D_STAFF -->
+{% if profile.role == "MANAGER" %}<section class="wrap" style="padding:16px 0 36px"><div class="profile-strip"><div><strong>Branch management reports</strong><p>Review confirmed sales, approved expenses, refunds and indicative margin at your assigned branch.</p></div><a class="button button-primary" href="{% url 'reporting_insights:home' %}">Branch reports →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13E_STAFF -->
+{% if profile.role == "MANAGER" or profile.role == "CASHIER" %}<section class="wrap" style="padding:16px 0 36px"><div class="profile-strip"><div><strong>Printable sales documents</strong><p>Print receipts or commercial invoices from completed sales.</p></div><a class="button button-primary" href="{% url 'sales_documents:home' %}">Print centre →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13F_STAFF -->
+{% if profile.role == "MANAGER" or profile.role == "WAREHOUSE" %}<section class="wrap" style="padding:12px 0 32px"><div class="profile-strip"><div><strong>Product barcode &amp; shelf labels</strong><p>Print price tags and scannable SKU labels. Products with no retail price are skipped.</p></div><a class="button button-primary" href="{% url 'label_printing:home' %}">Open label centre →</a></div></section>{% endif %}
+
+<!-- SMARTMART_STAGE13I_STAFF -->
+{% if profile.is_approved and profile.role == "MANAGER" %}<section class="wrap" style="padding:12px 0 24px"><div class="profile-strip"><div><strong>Supplier invoices &amp; payments</strong><p>View branch liabilities and record payments that were actually completed.</p></div><a class="button button-primary" href="{% url 'supplier_accounts:home' %}">Supplier accounts →</a></div></section>{% endif %}
 {% endblock %}

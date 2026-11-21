@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}{{ heading }} | SmartMart ERP{% endblock %}
+{% block content %}<link rel="stylesheet" href="{% static 'supplier_accounts/css/accounts.css' %}"><div class="supp-area"><div class="wrap"><div class="supp-hero"><h1>{{ heading }}</h1><p>{{ instructions }}</p></div>
+<section class="supp-panel supp-form"><p><a href="{% url 'supplier_accounts:home' %}?branch={{ branch.pk }}">← Supplier accounts</a></p>{% if invoice %}<p>Supplier: <strong>{{ invoice.supplier.name }}</strong> · Invoice amount KES {{ invoice.amount|floatformat:2 }} · Outstanding KES {{ invoice.balance|floatformat:2 }}</p>{% endif %}
+<form method="post" novalidate>{% csrf_token %}<input type="hidden" name="branch" value="{{ branch.pk }}">
+{% if form.non_field_errors %}<div class="supp-error">{{ form.non_field_errors }}</div>{% endif %}
+{% for field in form %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="supp-help">{{ field.help_text }}</small>{% endif %}{% if field.errors %}<div class="supp-error">{{ field.errors }}</div>{% endif %}{% endfor %}
+<p class="supp-help">Make sure you have a genuine supplier document or completed payment confirmation before saving. Records cannot be edited or deleted from this page.</p>
+<button type="submit" class="button button-primary">Save record</button></form></section></div></div>{% endblock %}

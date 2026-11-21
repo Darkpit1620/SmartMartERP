@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Print Sales Documents | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'sales_documents/css/documents.css' %}">
+<div class="doc-wrap"><div class="doc-breadcrumb"><a href="{% url 'pos:index' %}">POS</a> / Print centre</div>
+<div class="doc-title-row"><div><p class="doc-kicker">STAGE 13E · SALES DOCUMENTS</p><h1>Receipts &amp; commercial invoices</h1><p>Print from permanent POS sale records. No new sale or payment is created by printing.</p></div><a class="doc-button doc-secondary" href="{% url 'sales_documents:brand_settings' %}">Branch receipt branding</a></div>
+{% if messages %}{% for message in messages %}<p class="doc-notice">{{ message }}</p>{% endfor %}{% endif %}
+<div class="doc-panel"><div class="doc-table-scroll"><table class="doc-table"><thead><tr><th>Sale receipt</th><th>Date</th><th>Branch</th><th>Payment status</th><th>Amount</th><th>Documents</th></tr></thead><tbody>
+{% for sale in page %}<tr><td><strong>{{ sale.receipt_number }}</strong></td><td>{{ sale.created_at|date:'d M Y H:i' }}</td><td>{{ sale.branch.name }}</td><td>{{ sale.get_payment_status_display }}</td><td>KES {{ sale.subtotal|floatformat:2 }}</td><td><a href="{% url 'sales_documents:thermal_receipt' sale.pk %}">80mm receipt</a> &nbsp; <a href="{% url 'sales_documents:commercial_invoice' sale.pk %}">Invoice</a></td></tr>
+{% empty %}<tr><td colspan="6">No sale receipts are visible to your account.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if page.has_other_pages %}<nav class="doc-pagination">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?page={{ page.next_page_number }}">Next</a>{% endif %}</nav>{% endif %}</div>
+<p class="doc-warning">These are ordinary business documents, not KRA eTIMS fiscal invoices. Never treat an unverified M-Pesa, card, or bank reference as a confirmed payment.</p></div>
+{% endblock %}

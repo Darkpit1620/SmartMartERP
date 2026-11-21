@@ -1,0 +1,11 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Receipt Branding | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'sales_documents/css/documents.css' %}">
+<div class="doc-wrap doc-narrow"><div class="doc-breadcrumb"><a href="{% url 'sales_documents:home' %}">Print centre</a> / Branch branding</div><h1>Branch receipt branding</h1><p>Change the business name and contact details printed on new receipt and commercial-invoice copies. Original POS records remain unchanged.</p>
+{% if branches %}<form class="doc-panel" method="get"><label for="doc-branch">Select branch</label><select name="branch" id="doc-branch">{% for option in branches %}<option value="{{ option.pk }}" {% if branch and option.pk == branch.pk %}selected{% endif %}>{{ option.name }}</option>{% endfor %}</select><button class="doc-button" type="submit">Select branch</button></form>{% endif %}
+{% if branch %}<p class="doc-notice">Editing branding for {{ branch.name }} ({{ branch.code }}).</p>
+<form class="doc-panel doc-form" method="post">{% csrf_token %}<input type="hidden" name="branch" value="{{ branch.pk }}">{% for field in form %}<div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="doc-field-error">{{ error }}</p>{% endfor %}</div>{% endfor %}
+{% if form.non_field_errors %}<p class="doc-field-error">{{ form.non_field_errors }}</p>{% endif %}<button class="doc-button" type="submit">Save branch branding</button></form>{% else %}<p>No active branch is configured.</p>{% endif %}
+<p class="doc-warning">This screen does not register your business with KRA or issue eTIMS documents. Only use a verified business registration number.</p></div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}{% load static %}
+{% block title %}Print Receipt {{ sale.receipt_number }} | SmartMart ERP{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'sales_documents/css/documents.css' %}">
+<div class="doc-wrap doc-receipt-page">
+<div class="doc-actions"><a class="doc-button doc-secondary" href="{% url 'pos:receipt' sale.pk %}">Original receipt</a><a class="doc-button doc-secondary" href="{% url 'sales_documents:commercial_invoice' sale.pk %}">Commercial invoice</a><button class="doc-button" type="button" onclick="window.print()">Print receipt</button></div>
+<section class="doc-thermal" aria-label="80mm printable sale receipt">
+<header class="doc-thermal-head"><div class="doc-symbol">▦</div><h1>{% if brand %}{{ brand.trade_name }}{% else %}{{ sale.branch.name }}{% endif %}</h1><p>{% if brand and brand.address %}{{ brand.address }}{% else %}{{ sale.branch.address }}{% endif %}</p><p>{% if brand and brand.phone %}{{ brand.phone }}{% elif sale.branch.phone %}{{ sale.branch.phone }}{% endif %}</p>{% if brand and brand.email %}<p>{{ brand.email }}</p>{% endif %}{% if brand and brand.business_number %}<p>Business registration: {{ brand.business_number }}</p>{% endif %}</header>
+<div class="doc-dotted"></div>
+<div class="doc-small-meta"><p><span>Receipt</span><strong>{{ sale.receipt_number }}</strong></p><p><span>Date</span><strong>{{ sale.created_at|date:'Y-m-d H:i' }}</strong></p><p><span>Branch</span><strong>{{ sale.branch.code }}</strong></p><p><span>Cashier</span><strong>{{ sale.cashier.username }}</strong></p><p><span>Sale</span><strong>{{ sale.get_sale_type_display }}</strong></p></div>
+<div class="doc-dotted"></div>
+<table class="doc-thermal-table"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Total</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.description }}<small>{{ item.sku }} · @ {{ item.unit_price|floatformat:2 }}</small></td><td class="num">{{ item.quantity|floatformat:-3 }}</td><td class="num">{{ item.line_total|floatformat:2 }}</td></tr>{% endfor %}</tbody></table>
+<div class="doc-dotted"></div>
+<div class="doc-totals"><p><span>Included tax (estimated)</span><span>KES {{ sale.included_tax|floatformat:2 }}</span></p><p class="doc-total"><span>TOTAL</span><span>KES {{ sale.subtotal|floatformat:2 }}</span></p><p><span>Payment</span><span>{{ sale.get_payment_method_display }}</span></p><p><span>Status</span><span>{{ sale.get_payment_status_display }}</span></p>{% if sale.payment_reference %}<p><span>Reference</span><span>{{ sale.payment_reference }}</span></p>{% endif %}{% if sale.payment_method == 'CASH' %}<p><span>Received</span><span>KES {{ sale.tendered_amount|floatformat:2 }}</span></p><p><span>Change</span><span>KES {{ sale.change_due|floatformat:2 }}</span></p>{% endif %}</div>
+{% if sale.payment_status == 'UNVERIFIED' %}<p class="doc-status-warning">PAYMENT UNVERIFIED — verify independently</p>{% endif %}
+<div class="doc-dotted"></div>
+<footer class="doc-thermal-footer">{% if brand and brand.footer %}<p>{{ brand.footer }}</p>{% else %}<p>Thank you for shopping with us.</p>{% endif %}<p>POS receipt only. Not a KRA eTIMS fiscal tax invoice.</p></footer>
+</section>
+<p class="doc-print-note">Choose an 80mm receipt paper size in your browser/printer settings. The print action uses your browser, not an external receipt-printing service.</p>
+</div>
+{% endblock %}
